@@ -2,27 +2,82 @@
 
 ## 目标
 
-将本仓库的自优化能力接入到“其他工程”，并做到：
+将本项目的“自优化闭环”能力接入任意工程，并做到：
 
-- 流程可复用（skill、错误复盘、周报）
-- 数据可量化（token、时长、成功率、返工率）
-- 接入成本可控（不要求改动主业务代码）
+- 流程可复用：任务记录、失败复盘、周报、技能迭代
+- 效果可量化：token、时长、成功率、返工率
+- 接入成本低：尽量不改业务代码
 
-## 接入方式
+## 接入模式
 
-1. 直接复制模板到目标工程  
-优点：简单直观。  
-缺点：后续同步模板更新成本高。
+1. 仅安装 Skill（推荐默认）
+- 适用：只想快速获得自优化能力，不想引入 submodule。
+- 特点：所有能力通过已安装 skill 的脚本完成，数据写入项目本地 `.agent-loop-data/`。
 
-2. Git Submodule（推荐）  
-优点：模板统一升级，目标工程只维护本地数据。  
-缺点：需要管理 submodule。
+2. Submodule 引入整仓
+- 适用：希望在项目中共用完整模板仓（文档、模板、脚本）。
+- 特点：版本管理更清晰，但接入稍重。
 
-3. 平台统一仓聚合  
-优点：跨工程统一看板。  
-缺点：接入和治理复杂度最高。
+## 方案 A：仅安装 Skill（推荐）
 
-## 推荐方案：Submodule + 工程本地数据目录
+### 1) 安装 skill
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo korilin/agent-auto-self-optimizing-closed-loop \
+  --path skills/agent-self-optimizing-loop
+```
+
+安装后重启 Codex。
+
+### 2) 在目标工程初始化数据目录
+
+在目标工程根目录执行：
+
+```bash
+SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
+"${SKILL_HOME}/scripts/setup_loop_workspace.sh" --workspace "$(pwd)"
+```
+
+这会创建：
+
+- `.agent-loop-data/metrics/task-runs.csv`
+- `.agent-loop-data/knowledge-base/errors/`
+- `.agent-loop-data/reports/`
+- `.agent-loop-data/skills/`
+- `.agent-loop-data/templates/error-entry.md`
+
+### 3) 日常运行命令
+
+```bash
+SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
+
+# 记录任务
+"${SKILL_HOME}/scripts/log_task_run.sh" \
+  --task-id TASK-1001 \
+  --task-type debug \
+  --project my-service \
+  --model gpt-5 \
+  --used-skill true \
+  --skill-name log-analysis-helper \
+  --total-tokens 1820 \
+  --duration-sec 420 \
+  --success true
+
+# 生成每周复盘
+"${SKILL_HOME}/scripts/weekly_review.sh"
+
+# 全量指标
+"${SKILL_HOME}/scripts/metrics_report.sh" --all
+
+# 单个 skill 效果
+"${SKILL_HOME}/scripts/metrics_report.sh" --skill log-analysis-helper
+
+# pre/post 对比
+"${SKILL_HOME}/scripts/metrics_report.sh" --all --cutover 2026-03-01
+```
+
+## 方案 B：Submodule 引入整仓
 
 在目标工程根目录执行：
 
@@ -34,84 +89,46 @@ mkdir -p .agent-loop-data/metrics .agent-loop-data/knowledge-base/errors .agent-
 cp .agent-loop/metrics/task-runs.csv .agent-loop-data/metrics/task-runs.csv
 ```
 
-### 命令使用（关键）
-
-所有运行数据都写入 `.agent-loop-data/`，不写回 submodule。
+命令示例：
 
 ```bash
-# 记录任务数据
 AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv \
-  ./.agent-loop/scripts/log_task_run.sh \
-  --task-id TASK-1001 \
-  --task-type debug \
-  --project my-service \
-  --model gpt-5 \
-  --used-skill true \
-  --skill-name log-analysis-helper \
-  --total-tokens 1820 \
-  --duration-sec 420 \
-  --success true
+  ./.agent-loop/scripts/log_task_run.sh --task-id TASK-1001 --task-type debug --project my-service --model gpt-5 --used-skill true --skill-name log-analysis-helper --total-tokens 1820 --duration-sec 420 --success true
 
-# 输出指标
-AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv \
-  ./.agent-loop/scripts/metrics_report.sh --all
-
-# 生成每周复盘
 AOSO_KB_DIR=.agent-loop-data/knowledge-base/errors \
 AOSO_REPORT_DIR=.agent-loop-data/reports \
   ./.agent-loop/scripts/weekly_review.sh
-
-# 在目标工程创建 skill（写到本地数据目录）
-./.agent-loop/scripts/create_skill.sh my-project-debug-helper .agent-loop-data/skills
 ```
 
-## 在目标工程如何“真正用起来”
+## 在目标工程如何真正生效
 
-1. 在目标工程的 `AGENTS.md` 加一条约定：  
-当任务命中 `.agent-loop-data/skills/<skill-name>/SKILL.md` 语义范围时，先读取该 skill 再执行。
+1. 在工程 `AGENTS.md` 加约定：命中 `.agent-loop-data/skills/<skill>/SKILL.md` 时先用对应 skill。
+2. 每个任务结束记录一条 task run。
+3. 每个失败事件写一条 error entry。
+4. 每周生成复盘并将有效规则回写到 `AGENTS.md` 或 skill。
 
-2. 每次任务结束记录一次 `log_task_run.sh`。
+## 如何评估是否有效
 
-3. 每次失败新增一个错误条目到 `.agent-loop-data/knowledge-base/errors/`。
+### 单个 skill 的降本效果
 
-4. 每周运行一次 `weekly_review.sh`，把有效预防规则沉淀回 `AGENTS.md` 或 skill。
-
-## 如何判断“自优化是否有效”
-
-### 单个 Skill 的 token 降幅
-
-命令：
-
-```bash
-AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv \
-  ./.agent-loop/scripts/metrics_report.sh --skill log-analysis-helper
-```
-
-看指标：
+查看：
 
 - `token_reduction_pct`
 - `duration_reduction_pct`
 - `success_rate_delta_pp`
 - `rework_rate_delta`
 
-### 工程整体效率提升（pre/post）
+### 工程整体效率提升
 
-命令：
-
-```bash
-AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv \
-  ./.agent-loop/scripts/metrics_report.sh --all --cutover 2026-03-01
-```
-
-看指标：
+查看 pre/post：
 
 - `delta_avg_tokens_pct`（越低越好）
 - `delta_avg_duration_pct`（越低越好）
 - `delta_success_rate_pp`（越高越好）
 - `delta_tasks_per_day_pct`（越高越好）
 
-### 统计建议
+## 统计口径建议
 
 - 单 skill 建议样本量 `n >= 20` 再下结论。
-- 只比较同 `task_type`，避免口径偏差。
-- 尽量保持模型版本一致，避免模型升级干扰结论。
+- 仅比较相同 `task_type`。
+- 尽量保持模型版本一致，减少干扰变量。

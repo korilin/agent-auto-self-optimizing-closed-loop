@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-DATA_FILE_DEFAULT="${ROOT_DIR}/metrics/task-runs.csv"
+WORKSPACE_DIR="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+DATA_FILE_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/metrics/task-runs.csv"
 DATA_FILE="${AOSO_DATA_FILE:-${DATA_FILE_DEFAULT}}"
 mode=""
 skill_name=""

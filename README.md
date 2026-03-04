@@ -11,8 +11,21 @@ A practical template to let an AI coding agent optimize itself over time with:
 - Weekly review and feedback loop
 - Measurable token and productivity impact tracking
 
+## Install as a Skill
+
+Install the reusable skill into Codex:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo korilin/agent-auto-self-optimizing-closed-loop \
+  --path skills/agent-self-optimizing-loop
+```
+
+After installation, restart Codex.
+
 ## Repository Layout
 
+- `skills/agent-self-optimizing-loop/`: Installable skill for project-level self-optimization.
 - `AGENTS.md`: Runtime governance and quality gates.
 - `docs/closed-loop-playbook.md`: Daily and weekly operating playbook.
 - `docs/measurement-framework.md`: How to quantify token and efficiency gains.

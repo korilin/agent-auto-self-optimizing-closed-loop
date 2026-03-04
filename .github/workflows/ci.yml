@@ -18,11 +18,23 @@ jobs:
           bash -n scripts/weekly_review.sh
           bash -n scripts/log_task_run.sh
           bash -n scripts/metrics_report.sh
+          bash -n skills/agent-self-optimizing-loop/scripts/setup_loop_workspace.sh
+          bash -n skills/agent-self-optimizing-loop/scripts/log_task_run.sh
+          bash -n skills/agent-self-optimizing-loop/scripts/weekly_review.sh
+          bash -n skills/agent-self-optimizing-loop/scripts/metrics_report.sh
 
       - name: Run smoke checks
         run: |
+          ROOT="$(pwd)"
           chmod +x scripts/*.sh
+          chmod +x skills/agent-self-optimizing-loop/scripts/*.sh
           ./scripts/create_skill.sh ci-smoke-skill
           ./scripts/log_task_run.sh --task-id TASK-CI-1 --task-type debug --project ci --model gpt-5 --used-skill false --total-tokens 100 --duration-sec 12 --success true
           ./scripts/weekly_review.sh
           ./scripts/metrics_report.sh --all
+          mkdir -p /tmp/aoso-skill-ci
+          skills/agent-self-optimizing-loop/scripts/setup_loop_workspace.sh --workspace /tmp/aoso-skill-ci
+          cd /tmp/aoso-skill-ci
+          "${ROOT}/skills/agent-self-optimizing-loop/scripts/log_task_run.sh" --task-id TASK-CI-2 --task-type debug --project ci --model gpt-5 --used-skill false --total-tokens 120 --duration-sec 10 --success true
+          "${ROOT}/skills/agent-self-optimizing-loop/scripts/weekly_review.sh"
+          "${ROOT}/skills/agent-self-optimizing-loop/scripts/metrics_report.sh" --all

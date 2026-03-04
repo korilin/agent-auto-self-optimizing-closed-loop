@@ -13,8 +13,21 @@
 - [跨工程接入说明书](docs/project-integration-guide-cn.md)
 - [指标评估方法](docs/measurement-framework.md)
 
+## 安装为 Skill
+
+将可复用 skill 安装到 Codex：
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo korilin/agent-auto-self-optimizing-closed-loop \
+  --path skills/agent-self-optimizing-loop
+```
+
+安装后重启 Codex。
+
 ## 仓库结构
 
+- `skills/agent-self-optimizing-loop/`：可安装的跨工程自优化 skill。
 - `AGENTS.md`：运行期治理规则与质量门禁。
 - `docs/closed-loop-playbook.md`：日常与每周执行手册。
 - `docs/measurement-framework.md`：token 与效率收益的量化方法。

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Self-Optimizing Loop"
+  short_description: "Run measurable self-optimization in any software project."
+  default_prompt: "Use this skill when asked to introduce, operate, or measure a project-level self-optimizing loop."
