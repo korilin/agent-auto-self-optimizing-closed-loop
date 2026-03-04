@@ -2,6 +2,7 @@
 
 [中文说明（README_CN）](README_CN.md)
 [Project Integration Guide (CN)](docs/project-integration-guide-cn.md)
+[Project-Local Maintainer Skill](skills/aoso-repo-maintainer/SKILL.md)
 
 A practical template to let an AI coding agent optimize itself over time with:
 
@@ -23,8 +24,17 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 
 After installation, restart Codex.
 
+For this repository's own maintenance workflow, install the project-local skill:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo korilin/agent-auto-self-optimizing-closed-loop \
+  --path skills/aoso-repo-maintainer
+```
+
 ## Repository Layout
 
+- `skills/aoso-repo-maintainer/`: Project-local maintainer skill (for this repository only).
 - `skills/agent-self-optimizing-loop/`: Installable skill for project-level self-optimization.
 - `AGENTS.md`: Runtime governance and quality gates.
 - `docs/closed-loop-playbook.md`: Daily and weekly operating playbook.

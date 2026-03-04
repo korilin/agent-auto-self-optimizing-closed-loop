@@ -22,13 +22,18 @@ jobs:
           bash -n skills/agent-self-optimizing-loop/scripts/log_task_run.sh
           bash -n skills/agent-self-optimizing-loop/scripts/weekly_review.sh
           bash -n skills/agent-self-optimizing-loop/scripts/metrics_report.sh
+          bash -n skills/aoso-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh
+          bash -n skills/aoso-repo-maintainer/scripts/validate_repo_workflow.sh
+          bash -n skills/aoso-repo-maintainer/scripts/install_to_codex.sh
 
       - name: Run smoke checks
         run: |
           ROOT="$(pwd)"
           chmod +x scripts/*.sh
           chmod +x skills/agent-self-optimizing-loop/scripts/*.sh
+          chmod +x skills/aoso-repo-maintainer/scripts/*.sh
           ./scripts/create_skill.sh ci-smoke-skill
+          skills/aoso-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh
           ./scripts/log_task_run.sh --task-id TASK-CI-1 --task-type debug --project ci --model gpt-5 --used-skill false --total-tokens 100 --duration-sec 12 --success true
           ./scripts/weekly_review.sh
           ./scripts/metrics_report.sh --all
@@ -38,3 +43,5 @@ jobs:
           "${ROOT}/skills/agent-self-optimizing-loop/scripts/log_task_run.sh" --task-id TASK-CI-2 --task-type debug --project ci --model gpt-5 --used-skill false --total-tokens 120 --duration-sec 10 --success true
           "${ROOT}/skills/agent-self-optimizing-loop/scripts/weekly_review.sh"
           "${ROOT}/skills/agent-self-optimizing-loop/scripts/metrics_report.sh" --all
+          cd "${ROOT}"
+          skills/aoso-repo-maintainer/scripts/validate_repo_workflow.sh

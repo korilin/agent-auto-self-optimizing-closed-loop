@@ -1,0 +1,4 @@
+interface:
+  display_name: "AOSO Repo Maintainer"
+  short_description: "Project-local maintenance workflow for this repository."
+  default_prompt: "Use this skill when maintaining scripts, docs, CI, and bundled skills in this repository."

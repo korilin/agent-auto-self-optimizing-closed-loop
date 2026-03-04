@@ -44,6 +44,17 @@ Skill quality gates:
 4. Repeated code lives in `scripts/` and is executable.
 5. Skill is validated before adoption.
 
+## Project-Local Skill
+
+Use project-local skill `aoso-repo-maintainer` for repository maintenance tasks:
+
+- path: `skills/aoso-repo-maintainer/`
+- trigger: any change to `scripts/`, `skills/`, CI, or workflow docs.
+- required workflow:
+  1. `skills/aoso-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh` (when runtime scripts changed)
+  2. `skills/aoso-repo-maintainer/scripts/validate_repo_workflow.sh`
+  3. Update docs when command behavior changed.
+
 ## Error KB Policy
 
 For every notable failure, create one file under `knowledge-base/errors/` named:

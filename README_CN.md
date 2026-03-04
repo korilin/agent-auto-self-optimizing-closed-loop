@@ -12,6 +12,7 @@
 
 - [跨工程接入说明书](docs/project-integration-guide-cn.md)
 - [指标评估方法](docs/measurement-framework.md)
+- [本仓库专用 skill](skills/aoso-repo-maintainer/SKILL.md)
 
 ## 安装为 Skill
 
@@ -25,8 +26,17 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 
 安装后重启 Codex。
 
+若要启用“仅本仓库使用”的维护工作流 skill，再安装：
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo korilin/agent-auto-self-optimizing-closed-loop \
+  --path skills/aoso-repo-maintainer
+```
+
 ## 仓库结构
 
+- `skills/aoso-repo-maintainer/`：仅本项目使用的维护工作流 skill。
 - `skills/agent-self-optimizing-loop/`：可安装的跨工程自优化 skill。
 - `AGENTS.md`：运行期治理规则与质量门禁。
 - `docs/closed-loop-playbook.md`：日常与每周执行手册。
@@ -80,6 +90,7 @@ cd agent-auto-self-optimizing-closed-loop
 3. 每次失败都写入错误知识库，明确根因与预防规则。
 4. 每周运行复盘脚本，把稳定有效的改进沉淀到 `AGENTS.md` 或 skill。
 5. 持续记录 `metrics/task-runs.csv`，用数据评估优化收益。
+6. 维护本仓库时优先使用 `skills/aoso-repo-maintainer/` 的同步与校验脚本。
 
 ## 发布检查清单
 
