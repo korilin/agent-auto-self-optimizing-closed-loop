@@ -1,6 +1,7 @@
 # Agent Auto Self-Optimizing Closed Loop
 
 [中文说明（README_CN）](README_CN.md)
+[Project Integration Guide (CN)](docs/project-integration-guide-cn.md)
 
 A practical template to let an AI coding agent optimize itself over time with:
 

@@ -8,6 +8,11 @@
 - 周期复盘与反馈闭环
 - 可量化的 token 与工程效率评估
 
+配套说明：
+
+- [跨工程接入说明书](docs/project-integration-guide-cn.md)
+- [指标评估方法](docs/measurement-framework.md)
+
 ## 仓库结构
 
 - `AGENTS.md`：运行期治理规则与质量门禁。

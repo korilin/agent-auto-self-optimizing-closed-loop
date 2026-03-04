@@ -2,14 +2,14 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-KB_DIR="${ROOT_DIR}/knowledge-base/errors"
-REPORT_DIR="${ROOT_DIR}/reports"
+KB_DIR="${AOSO_KB_DIR:-${ROOT_DIR}/knowledge-base/errors}"
+REPORT_DIR="${AOSO_REPORT_DIR:-${ROOT_DIR}/reports}"
 
 today="$(date +%Y-%m-%d)"
 start_date="$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)"
 report_file="${REPORT_DIR}/${today}-weekly-self-optimization-report.md"
 
-mkdir -p "${REPORT_DIR}"
+mkdir -p "${KB_DIR}" "${REPORT_DIR}"
 
 total=0
 resolved=0

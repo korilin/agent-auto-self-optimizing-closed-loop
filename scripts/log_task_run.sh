@@ -2,7 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-DATA_FILE="${ROOT_DIR}/metrics/task-runs.csv"
+DATA_FILE_DEFAULT="${ROOT_DIR}/metrics/task-runs.csv"
+DATA_FILE="${AOSO_DATA_FILE:-${DATA_FILE_DEFAULT}}"
 
 date_val="$(date +%Y-%m-%d)"
 task_id=""
@@ -19,6 +20,8 @@ rework_count="0"
 usage() {
   cat <<'EOF'
 Usage:
+  AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv ./scripts/log_task_run.sh ...
+
   ./scripts/log_task_run.sh \
     --task-id TASK-1001 \
     --task-type debug \
@@ -127,8 +130,8 @@ for pair in \
 done
 
 if [[ ! -f "$DATA_FILE" ]]; then
-  echo "error: data file not found: ${DATA_FILE}"
-  exit 1
+  mkdir -p "$(dirname "$DATA_FILE")"
+  echo "date,task_id,task_type,project,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count" > "$DATA_FILE"
 fi
 
 echo "${date_val},${task_id},${task_type},${project},${model},${used_skill},${skill_name},${total_tokens},${duration_sec},${success},${rework_count}" >> "${DATA_FILE}"
