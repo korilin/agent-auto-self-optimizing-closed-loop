@@ -12,6 +12,12 @@ Use this skill to operationalize and measure continuous optimization in any proj
 - Resolve the skill home as: `${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop`
 - Use project-local data under `.agent-loop-data/`
 
+## Automation Behavior
+
+- Do not ask the user to run logging/report commands manually when this skill is active.
+- At task completion, run `scripts/auto_run_loop.sh` automatically with task metadata.
+- Use `scripts/dashboard_server.sh` for interactive filtering instead of manual output parsing.
+
 ## Primary Workflow
 
 1. Initialize project data once:
@@ -20,10 +26,10 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 "${SKILL_HOME}/scripts/setup_loop_workspace.sh" --workspace "$(pwd)"
 ```
 
-2. Log each completed task:
+2. Run automation at task completion (collection + analysis + review):
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/log_task_run.sh" \
+"${SKILL_HOME}/scripts/auto_run_loop.sh" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -38,13 +44,13 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 3. Record failures in `.agent-loop-data/knowledge-base/errors/` using the generated template:
 - `.agent-loop-data/templates/error-entry.md`
 
-4. Generate weekly review:
+4. Open the web dashboard for filtering and visualization:
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/weekly_review.sh"
+"${SKILL_HOME}/scripts/dashboard_server.sh" --host 127.0.0.1 --port 8765
 ```
 
-5. Measure optimization effect:
+5. Optional direct commands (if you need script-level outputs):
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 "${SKILL_HOME}/scripts/metrics_report.sh" --all
@@ -72,6 +78,9 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 ## Scripts
 
 - `scripts/setup_loop_workspace.sh`: Initialize project-local data directories.
+- `scripts/auto_run_loop.sh`: Auto-run logging + metrics + weekly review in one command.
 - `scripts/log_task_run.sh`: Append one standardized task-run record.
 - `scripts/weekly_review.sh`: Build weekly optimization report from error KB.
 - `scripts/metrics_report.sh`: Compute overall, per-skill, and pre/post metrics.
+- `scripts/dashboard_server.sh`: Start local dashboard web server.
+- `scripts/dashboard_server.py`: Dashboard backend and UI.

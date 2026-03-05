@@ -18,9 +18,9 @@
 
 初始化完成后，你会得到一套稳定循环和清晰产物：
 
-1. 任务执行日志（任务 ID、token、时长、成功率、返工）。
+1. 一条命令自动完成记录 + 分析 + 周报。
 2. skill 效果评估（`token_reduction_pct`、`duration_reduction_pct` 等）。
-3. 基于错误知识库自动生成周报。
+3. 本地可筛选 Web 看板（日期、skill、cutover、指标关键字）。
 4. 指定切换日期后的 pre/post 对比结果。
 
 数据默认在你的项目目录 `.agent-loop-data/` 下：
@@ -66,13 +66,13 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 - 自动创建 `.agent-loop-data/reports/`。
 - 自动创建 `.agent-loop-data/templates/error-entry.md`。
 
-## 4. 日常使用路径（用户视角）
+## 4. 日常使用路径（全自动）
 
-1. 每个任务完成后记录一次：
+1. 在 agent 工作流中，任务完成后应自动执行此命令（采集 + 分析 + 周报）：
 
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/log_task_run.sh" \
+"${SKILL_HOME}/scripts/auto_run_loop.sh" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -85,21 +85,21 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --rework-count 0
 ```
 
-2. 失败任务按模板记录到 `.agent-loop-data/knowledge-base/errors/`。
+2. 打开看板做筛选和查看：
 
-3. 运行统计与周报：
+```bash
+SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
+"${SKILL_HOME}/scripts/dashboard_server.sh" --host 127.0.0.1 --port 8765
+```
+
+然后访问 `http://127.0.0.1:8765`。
+
+3. 如需原始命令输出（可选）：
 
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 "${SKILL_HOME}/scripts/metrics_report.sh" --all
 "${SKILL_HOME}/scripts/metrics_report.sh" --skill log-analysis-helper
-"${SKILL_HOME}/scripts/weekly_review.sh"
-```
-
-4. 看策略上线前后效果：
-
-```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 "${SKILL_HOME}/scripts/metrics_report.sh" --all --cutover YYYY-MM-DD
 ```
 
@@ -111,7 +111,7 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 2. 出现 `insufficient baseline` 说明样本不足，先补 baseline。
 3. 不要只看 token，需结合 `success_rate_delta_pp` 和 `rework_rate_delta`。
 4. `--cutover` 对比需要 pre/post 都有足够样本。
-5. 关注周趋势，不要用单次任务波动下结论。
+5. 在看板中先做日期和 skill 筛选，再比较指标趋势。
 
 ## 6. 作者/维护者入口
 

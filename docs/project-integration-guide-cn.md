@@ -47,13 +47,15 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 - `.agent-loop-data/skills/`
 - `.agent-loop-data/templates/error-entry.md`
 
-### 3) 日常运行命令
+### 3) 日常运行命令（自动模式）
+
+建议在你的 agent 结束任务时自动触发以下命令，而不是让用户手动执行。
 
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 
-# 记录任务
-"${SKILL_HOME}/scripts/log_task_run.sh" \
+# 自动执行：记录 + 指标分析 + 周报
+"${SKILL_HOME}/scripts/auto_run_loop.sh" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -64,16 +66,12 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --duration-sec 420 \
   --success true
 
-# 生成每周复盘
-"${SKILL_HOME}/scripts/weekly_review.sh"
+# 打开本地看板（日期/skill/cutover/指标筛选）
+"${SKILL_HOME}/scripts/dashboard_server.sh" --host 127.0.0.1 --port 8765
 
-# 全量指标
+# 可选：CLI 原始输出
 "${SKILL_HOME}/scripts/metrics_report.sh" --all
-
-# 单个 skill 效果
 "${SKILL_HOME}/scripts/metrics_report.sh" --skill log-analysis-helper
-
-# pre/post 对比
 "${SKILL_HOME}/scripts/metrics_report.sh" --all --cutover 2026-03-01
 ```
 
@@ -92,20 +90,20 @@ cp .agent-loop/metrics/task-runs.csv .agent-loop-data/metrics/task-runs.csv
 命令示例：
 
 ```bash
+# 自动执行：记录 + 指标分析 + 周报
 AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv \
-  ./.agent-loop/scripts/log_task_run.sh --task-id TASK-1001 --task-type debug --project my-service --model gpt-5 --used-skill true --skill-name log-analysis-helper --total-tokens 1820 --duration-sec 420 --success true
+  ./.agent-loop/scripts/auto_run_loop.sh --task-id TASK-1001 --task-type debug --project my-service --model gpt-5 --used-skill true --skill-name log-analysis-helper --total-tokens 1820 --duration-sec 420 --success true
 
-AOSO_KB_DIR=.agent-loop-data/knowledge-base/errors \
-AOSO_REPORT_DIR=.agent-loop-data/reports \
-  ./.agent-loop/scripts/weekly_review.sh
+# 启动看板
+./.agent-loop/scripts/dashboard_server.sh --host 127.0.0.1 --port 8765
 ```
 
 ## 在目标工程如何真正生效
 
 1. 在工程 `AGENTS.md` 加约定：命中 `.agent-loop-data/skills/<skill>/SKILL.md` 时先用对应 skill。
-2. 每个任务结束记录一条 task run。
-3. 每个失败事件写一条 error entry。
-4. 每周生成复盘并将有效规则回写到 `AGENTS.md` 或 skill。
+2. 每个任务结束执行 `auto_run_loop.sh`，由脚本自动采集和分析。
+3. 每个失败事件写一条 error entry（脚本自动分析会读取这些条目）。
+4. 用 dashboard 做日期/skill/指标筛选，再把有效规则回写到 `AGENTS.md` 或 skill。
 
 ## 如何评估是否有效
 

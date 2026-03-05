@@ -10,6 +10,9 @@ runtime_scripts=(
   "log_task_run.sh"
   "metrics_report.sh"
   "weekly_review.sh"
+  "auto_run_loop.sh"
+  "dashboard_server.sh"
+  "dashboard_server.py"
 )
 
 for f in "${runtime_scripts[@]}"; do

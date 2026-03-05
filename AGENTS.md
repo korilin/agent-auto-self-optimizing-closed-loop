@@ -15,7 +15,7 @@ Deliver high-quality outcomes while reducing average token cost per task over ti
 
 1. Classify request by task type and risk.
 2. Reuse existing skill if available; avoid rebuilding context from scratch.
-3. Execute with the minimum context needed.
+3. Execute with the minimum context needed and run automation scripts for repeatable data capture.
 4. Validate output with concrete checks (tests, lint, expected files).
 5. Record failures and high-cost runs in knowledge base.
 6. Promote proven fixes into `AGENTS.md` or skills.
@@ -56,6 +56,11 @@ Use project-local skill `aoso-repo-maintainer` for repository maintenance tasks:
   3. `skills/aoso-repo-maintainer/scripts/check_readme_sync.sh` (README.md and README_CN.md must stay synchronized)
   4. `skills/aoso-repo-maintainer/scripts/validate_repo_workflow.sh`
   5. `skills/aoso-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"`
+
+## Automation Policy
+
+- Prefer `scripts/auto_run_loop.sh` / `skills/agent-self-optimizing-loop/scripts/auto_run_loop.sh` over manual multi-command operation.
+- Prefer dashboard filtering via `scripts/dashboard_server.sh` for interactive metric analysis.
 
 ## Error KB Policy
 

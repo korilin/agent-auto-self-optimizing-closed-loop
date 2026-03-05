@@ -18,9 +18,9 @@ Companion docs:
 
 After setup, you get a repeatable loop with concrete outputs:
 
-1. Task run logging (`task_id`, tokens, duration, success, rework).
+1. Automatic run logging + metrics + weekly review with one command.
 2. Skill impact reports (`token_reduction_pct`, `duration_reduction_pct`, etc.).
-3. Weekly incident review generated from an error knowledge base.
+3. Filterable local web dashboard (date, skill, cutover, metric key filter).
 4. Clear pre/post comparison around a chosen cutover date.
 
 In your project, data is stored under `.agent-loop-data/`:
@@ -66,13 +66,13 @@ Expected result:
 - `.agent-loop-data/reports/` created.
 - `.agent-loop-data/templates/error-entry.md` created.
 
-## 4. Daily Workflow (User Path)
+## 4. Daily Workflow (Fully Automated Path)
 
-1. Log each completed task:
+1. In agent workflow, this command should be auto-executed at task completion (collect + analyze + review):
 
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/log_task_run.sh" \
+"${SKILL_HOME}/scripts/auto_run_loop.sh" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -85,21 +85,21 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --rework-count 0
 ```
 
-2. Record notable failures in `.agent-loop-data/knowledge-base/errors/` using the template.
+2. Open dashboard for filtering and visualization:
 
-3. Run reports:
+```bash
+SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
+"${SKILL_HOME}/scripts/dashboard_server.sh" --host 127.0.0.1 --port 8765
+```
+
+Then open `http://127.0.0.1:8765`.
+
+3. Optional direct report commands (if you need raw CLI output):
 
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 "${SKILL_HOME}/scripts/metrics_report.sh" --all
 "${SKILL_HOME}/scripts/metrics_report.sh" --skill log-analysis-helper
-"${SKILL_HOME}/scripts/weekly_review.sh"
-```
-
-4. For pre/post effect analysis:
-
-```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 "${SKILL_HOME}/scripts/metrics_report.sh" --all --cutover YYYY-MM-DD
 ```
 
@@ -111,7 +111,7 @@ Use these rules to avoid false conclusions:
 2. If output says `insufficient baseline`, collect more baseline samples first.
 3. Read `success_rate_delta_pp` and `rework_rate_delta` together with token reduction.
 4. Use `--cutover` only when both pre and post windows have enough samples.
-5. Track trend over weeks, not single-task spikes.
+5. In dashboard, use date range + skill filter before comparing metric trends.
 
 ## 6. Author/Maintainer Entry
 

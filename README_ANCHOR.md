@@ -85,8 +85,8 @@ skills/aoso-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"
 
 ## 5. 作者日常运行节奏（建议）
 
-1. 每个任务完成后写入 `metrics/task-runs.csv`（或项目 `.agent-loop-data`）。
-2. 每周运行 `./scripts/weekly_review.sh` 生成周报。
+1. 每个任务完成后运行 `./scripts/auto_run_loop.sh` 自动执行记录+分析+周报。
+2. 用 `./scripts/dashboard_server.sh` 查看可筛选看板并验证趋势。
 3. 对新增失败在 `knowledge-base/errors/` 建立标准条目。
 4. 当重复工作流 >= 3 次/7天，或高成本/重复失败出现时，新增或重构 skill。
 5. 仅在有事故证据或指标收益时，修改 `AGENTS.md` 规则。
