@@ -1,6 +1,6 @@
 # Agent 自动自优化闭环（用户手册）
 
-<!-- README_SYNC_VERSION: 2026-03-05 -->
+<!-- README_SYNC_VERSION: 2026-03-06 -->
 
 这个项目用于在你的工程里落地“可量化”的 AI 编码自优化闭环。
 如果你的目标是“作为 skill 使用者快速上手”，请从这份 README 开始。
@@ -21,7 +21,7 @@
 1. 一条命令自动完成记录 + 分析 + 周报。
 2. skill 效果评估（`token_reduction_pct`、`duration_reduction_pct` 等）。
 3. 本地可筛选 Web 看板（日期、skill、cutover、指标关键字）。
-4. skill 优化机会自动发现，并支持手动触发优化方案生成。
+4. skill 优化机会自动发现，并支持在看板中立即执行优化/创建。
 5. 指定切换日期后的 pre/post 对比结果。
 
 数据默认在你的项目目录 `.agent-loop-data/` 下：
@@ -89,7 +89,7 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 如果运行时能提供真实遥测，请传入 `total_tokens` / `duration_sec`
 （或设置 `CODEX_TOTAL_TOKENS`、`CODEX_TASK_DURATION_SEC`），避免写入占位 0 值。
 
-2. 打开看板做筛选、优化发现和手动触发：
+2. 打开看板做筛选、优化发现和直接执行：
 
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
@@ -97,8 +97,8 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 ```
 
 然后访问 `http://127.0.0.1:8765`。
-在 `Skill Optimization Discovery` 区域可直接触发对应 skill 的优化方案生成。
-在 `New Skill Recommendations` 区域可查看“建议新增 skill”及对应理由。
+在 `Skill Optimization Discovery` 区域可对现有 skill 立即执行优化。
+在 `New Skill Recommendations` 区域可一键创建并优化新增 skill。
 
 3. 如需原始命令输出（可选）：
 

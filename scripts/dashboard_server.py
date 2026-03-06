@@ -64,6 +64,21 @@ HTML_PAGE = """<!doctype html>
       padding: 20px;
       margin-bottom: 18px;
     }
+    .hero-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .lang-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .lang-inline select {
+      min-width: 112px;
+    }
     .hero h1 {
       margin: 0 0 8px;
       font-size: 30px;
@@ -212,6 +227,10 @@ HTML_PAGE = """<!doctype html>
       opacity: 0.6;
       cursor: not-allowed;
     }
+    .trigger-btn.new-skill {
+      border-color: #2f5c8f;
+      background: #2f5c8f;
+    }
     .rec-wrap {
       margin-top: 10px;
       display: grid;
@@ -273,6 +292,14 @@ HTML_PAGE = """<!doctype html>
 <body>
   <div class="wrap">
     <section class="hero">
+      <div class="hero-toolbar">
+        <label class="lang-inline"><span data-i18n="label_language">Language</span>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+          </select>
+        </label>
+      </div>
       <h1 data-i18n="hero_title">Self-Optimizing Loop Dashboard</h1>
       <p data-i18n="hero_subtitle">Filter by date, skill, cutover, and metric key. The page executes local project scripts to load data.</p>
     </section>
@@ -293,12 +320,6 @@ HTML_PAGE = """<!doctype html>
         </label>
         <label><span data-i18n="label_metric_filter">Metric Key Filter</span>
           <input id="metricFilter" type="text" placeholder="token|duration|success" data-i18n-placeholder="placeholder_metric_filter" />
-        </label>
-        <label><span data-i18n="label_language">Language</span>
-          <select id="languageSelect">
-            <option value="en">English</option>
-            <option value="zh">中文</option>
-          </select>
         </label>
       </div>
       <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
@@ -373,15 +394,20 @@ HTML_PAGE = """<!doctype html>
         label_rows: "rows",
         label_data_file: "data_file",
         label_generated_at: "generated_at",
-        btn_trigger_opt: "Trigger Self-Optimization",
+        btn_optimize_now: "Optimize Now",
+        btn_create_and_optimize: "Create and Optimize Now",
         btn_running: "Running...",
-        btn_triggered: "Triggered",
+        btn_optimize_done: "Optimized",
+        btn_create_done: "Created",
         msg_no_skill_query: "(no skill query)",
         msg_empty: "(empty)",
         msg_load_failed: "Load failed",
         msg_init_failed: "Initialization failed",
         msg_opt_failed: "Optimize failed",
+        msg_opt_done: "Optimization completed",
         log_skill: "skill",
+        log_target: "target",
+        log_action: "action",
         log_status: "status",
         log_score: "score",
         log_report: "report",
@@ -425,15 +451,20 @@ HTML_PAGE = """<!doctype html>
         label_rows: "行数",
         label_data_file: "数据文件",
         label_generated_at: "生成时间",
-        btn_trigger_opt: "触发自优化",
+        btn_optimize_now: "立即优化",
+        btn_create_and_optimize: "创建并立即优化",
         btn_running: "执行中...",
-        btn_triggered: "已触发",
+        btn_optimize_done: "已优化",
+        btn_create_done: "已创建",
         msg_no_skill_query: "（未指定 skill 查询）",
         msg_empty: "（空）",
         msg_load_failed: "加载失败",
         msg_init_failed: "初始化失败",
         msg_opt_failed: "优化触发失败",
+        msg_opt_done: "优化已完成",
         log_skill: "skill",
+        log_target: "目标",
+        log_action: "动作",
         log_status: "状态",
         log_score: "评分",
         log_report: "报告",
@@ -536,6 +567,14 @@ HTML_PAGE = """<!doctype html>
       return t(`status_${raw}`);
     }
 
+    function escAttr(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
     function renderOpportunities(items) {
       nodes.opportunities.innerHTML = "";
       if (!items || items.length === 0) {
@@ -563,7 +602,7 @@ HTML_PAGE = """<!doctype html>
           <ul class="mini-list">${actions || `<li>${t("label_none")}</li>`}</ul>
           <div style="font-size:12px; margin:8px 0 6px;">${t("label_top_root_causes")}</div>
           <ul class="mini-list">${roots || `<li>${t("label_none")}</li>`}</ul>
-          <button class="trigger-btn" data-skill="${item.skill}" data-default-label="${t("btn_trigger_opt")}" ${disabled}>${t("btn_trigger_opt")}</button>
+          <button class="trigger-btn trigger-existing-btn" data-skill="${escAttr(item.skill)}" data-default-label="${t("btn_optimize_now")}" ${disabled}>${t("btn_optimize_now")}</button>
         `;
         nodes.opportunities.appendChild(card);
       }
@@ -597,18 +636,13 @@ HTML_PAGE = """<!doctype html>
           <ul class="mini-list">${actions || `<li>${t("label_none")}</li>`}</ul>
           <div style="font-size:12px; margin:8px 0 6px;">${t("label_top_root_causes")}</div>
           <ul class="mini-list">${roots || `<li>${t("label_none")}</li>`}</ul>
+          <button class="trigger-btn new-skill trigger-new-btn" data-skill="${escAttr(item.suggested_skill_name)}" data-task-type="${escAttr(item.task_type)}" data-default-label="${t("btn_create_and_optimize")}">${t("btn_create_and_optimize")}</button>
         `;
         nodes.newSkillRecommendations.appendChild(card);
       }
     }
 
-    async function triggerOptimization(skill) {
-      const payload = {
-        skill,
-        start: nodes.startDate.value || "",
-        end: nodes.endDate.value || "",
-        cutover: nodes.cutoverDate.value || "",
-      };
+    async function postOptimize(payload) {
       const response = await fetch("/api/optimize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -617,16 +651,19 @@ HTML_PAGE = """<!doctype html>
       if (!response.ok) {
         throw new Error(await response.text());
       }
-      const data = await response.json();
+      return response.json();
+    }
+
+    function appendOptimizeLog(data, targetValue) {
       const now = new Date().toISOString();
       const line = [
-        `[${now}] ${t("log_skill")}=${skill}`,
+        `[${now}] ${t("log_action")}=${data.action || "optimize"}`,
+        `${t("log_target")}=${targetValue || data.skill || "n/a"}`,
         `${t("log_status")}=${data.optimization_status || t("status_unknown")}`,
         `${t("log_score")}=${data.opportunity_score || "n/a"}`,
         `${t("log_report")}=${data.report_file || "n/a"}`,
       ].join(" | ");
       nodes.optimizeLog.textContent = `${line}\n${nodes.optimizeLog.textContent || ""}`.trim();
-      return data;
     }
 
     async function refreshDashboard() {
@@ -690,17 +727,16 @@ HTML_PAGE = """<!doctype html>
           `${t("label_rows")}=${lastReport.row_count} | ${t("label_data_file")}=${lastReport.data_file} | ${t("label_generated_at")}=${lastReport.generated_at}`;
       }
     });
-    nodes.opportunities.addEventListener("click", async (event) => {
-      const btn = event.target.closest(".trigger-btn");
-      if (!btn) return;
-      const skill = btn.getAttribute("data-skill");
-      if (!skill) return;
+    async function runOptimizationFromButton(btn, payload, doneLabel) {
       btn.disabled = true;
-      const old = btn.getAttribute("data-default-label") || t("btn_trigger_opt");
+      const old = btn.getAttribute("data-default-label") || "";
       btn.textContent = t("btn_running");
       try {
-        await triggerOptimization(skill);
-        btn.textContent = t("btn_triggered");
+        const data = await postOptimize(payload);
+        appendOptimizeLog(data, payload.skill || "");
+        btn.textContent = doneLabel;
+        nodes.hint.textContent = t("msg_opt_done");
+        await refreshDashboard();
       } catch (err) {
         nodes.hint.textContent = `${t("msg_opt_failed")}: ${err.message}`;
         btn.textContent = old;
@@ -710,6 +746,59 @@ HTML_PAGE = """<!doctype html>
           btn.textContent = old;
         }, 1200);
       }
+    }
+
+    nodes.opportunities.addEventListener("click", async (event) => {
+      const btn = event.target.closest(".trigger-existing-btn");
+      if (!btn) return;
+      const skill = btn.getAttribute("data-skill");
+      if (!skill) return;
+      const opp = (lastReport && Array.isArray(lastReport.opportunities))
+        ? lastReport.opportunities.find((item) => item.skill === skill)
+        : null;
+      await runOptimizationFromButton(
+        btn,
+        {
+          target: "existing",
+          skill,
+          start: nodes.startDate.value || "",
+          end: nodes.endDate.value || "",
+          cutover: nodes.cutoverDate.value || "",
+          reasons: (opp && Array.isArray(opp.reasons)) ? opp.reasons : [],
+          suggested_actions: (opp && Array.isArray(opp.suggested_actions)) ? opp.suggested_actions : [],
+          top_root_causes: (opp && Array.isArray(opp.top_root_causes)) ? opp.top_root_causes : [],
+          status: (opp && opp.status) ? opp.status : "",
+          score: (opp && opp.score !== undefined) ? String(opp.score) : "",
+        },
+        t("btn_optimize_done"),
+      );
+    });
+    nodes.newSkillRecommendations.addEventListener("click", async (event) => {
+      const btn = event.target.closest(".trigger-new-btn");
+      if (!btn) return;
+      const skill = btn.getAttribute("data-skill");
+      const taskType = btn.getAttribute("data-task-type");
+      if (!skill || !taskType) return;
+      const rec = (lastReport && Array.isArray(lastReport.new_skill_recommendations))
+        ? lastReport.new_skill_recommendations.find((item) => item.suggested_skill_name === skill && item.task_type === taskType)
+        : null;
+      await runOptimizationFromButton(
+        btn,
+        {
+          target: "new",
+          skill,
+          task_type: taskType,
+          start: nodes.startDate.value || "",
+          end: nodes.endDate.value || "",
+          cutover: nodes.cutoverDate.value || "",
+          findings: (rec && Array.isArray(rec.findings)) ? rec.findings : [],
+          suggested_actions: (rec && Array.isArray(rec.suggested_actions)) ? rec.suggested_actions : [],
+          top_root_causes: (rec && Array.isArray(rec.top_root_causes)) ? rec.top_root_causes : [],
+          status: (rec && rec.status) ? rec.status : "",
+          score: (rec && rec.score !== undefined) ? String(rec.score) : "",
+        },
+        t("btn_create_done"),
+      );
     });
     boot();
   </script>
@@ -732,9 +821,13 @@ def _today() -> str:
 
 @dataclass
 class RuntimePaths:
+    script_dir: Path
+    workspace_dir: Path
+    skill_mode: bool
     data_file: Path
     kb_dir: Path
     report_dir: Path
+    local_skills_dir: Path
     metrics_script: Path
     weekly_script: Path
     optimize_script: Path
@@ -749,20 +842,29 @@ def resolve_runtime_paths() -> RuntimePaths:
         data_file_default = workspace / ".agent-loop-data/metrics/task-runs.csv"
         kb_dir_default = workspace / ".agent-loop-data/knowledge-base/errors"
         report_dir_default = workspace / ".agent-loop-data/reports"
+        local_skills_dir_default = workspace / ".agent-loop-data/skills"
     else:
         root_dir = script_dir.parent
         data_file_default = root_dir / "metrics/task-runs.csv"
         kb_dir_default = root_dir / "knowledge-base/errors"
         report_dir_default = root_dir / "reports"
+        local_skills_dir_default = root_dir / "skills"
 
     data_file = Path(os.environ.get("AOSO_DATA_FILE", str(data_file_default))).resolve()
     kb_dir = Path(os.environ.get("AOSO_KB_DIR", str(kb_dir_default))).resolve()
     report_dir = Path(os.environ.get("AOSO_REPORT_DIR", str(report_dir_default))).resolve()
+    local_skills_dir = Path(
+        os.environ.get("AOSO_LOCAL_SKILLS_DIR", str(local_skills_dir_default))
+    ).resolve()
 
     return RuntimePaths(
+        script_dir=script_dir,
+        workspace_dir=workspace,
+        skill_mode=skill_mode,
         data_file=data_file,
         kb_dir=kb_dir,
         report_dir=report_dir,
+        local_skills_dir=local_skills_dir,
         metrics_script=script_dir / "metrics_report.sh",
         weekly_script=script_dir / "weekly_review.sh",
         optimize_script=script_dir / "optimize_skill.sh",
@@ -1360,6 +1462,215 @@ def run_weekly_review(
         return path.read_text(encoding="utf-8")
 
 
+AUTO_OPT_START = "<!-- AOSO_AUTO_OPT_START -->"
+AUTO_OPT_END = "<!-- AOSO_AUTO_OPT_END -->"
+
+
+def _ensure_str_list(value: object) -> List[str]:
+    if not isinstance(value, list):
+        return []
+    items: List[str] = []
+    for item in value:
+        text = str(item).strip()
+        if text:
+            items.append(text)
+    return _unique_ordered(items)
+
+
+def _skill_roots(paths: RuntimePaths) -> List[Path]:
+    roots = [paths.local_skills_dir, paths.workspace_dir / "skills", paths.script_dir.parent / "skills"]
+    unique: List[Path] = []
+    seen = set()
+    for root in roots:
+        key = str(root.resolve())
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(root.resolve())
+    return unique
+
+
+def resolve_existing_skill_dir(paths: RuntimePaths, skill_name: str) -> Optional[Path]:
+    raw = skill_name.strip()
+    normalized = _to_kebab(raw)
+    names = _unique_ordered([raw, normalized])
+    for root in _skill_roots(paths):
+        for name in names:
+            if not name:
+                continue
+            candidate = root / name
+            if (candidate / "SKILL.md").is_file():
+                return candidate
+    return None
+
+
+def create_skill_scaffold(
+    skill_dir: Path,
+    skill_name: str,
+    task_type: str,
+    suggested_actions: Sequence[str],
+) -> List[Path]:
+    created: List[Path] = []
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    for sub in ("agents", "scripts", "references", "assets"):
+        sub_path = skill_dir / sub
+        if not sub_path.exists():
+            sub_path.mkdir(parents=True, exist_ok=True)
+            created.append(sub_path)
+    for keep in ("scripts/.gitkeep", "references/.gitkeep", "assets/.gitkeep"):
+        keep_path = skill_dir / keep
+        if not keep_path.exists():
+            keep_path.write_text("", encoding="utf-8")
+            created.append(keep_path)
+
+    workflow_actions = [action.strip() for action in suggested_actions if action.strip()][:4]
+    if not workflow_actions:
+        workflow_actions = [
+            "Read only task-relevant context.",
+            "Execute deterministic steps via scripts first.",
+            "Validate outputs against clear done checks.",
+            "Record failures and prevention rules.",
+        ]
+
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.exists():
+        workflow_block = "\n".join(
+            f"{idx}. {line}" for idx, line in enumerate(workflow_actions, start=1)
+        )
+        task_type_value = task_type.strip() or "general"
+        skill_md.write_text(
+            f"""---
+name: {skill_name}
+description: Auto-generated skill for {task_type_value} tasks from dashboard recommendation.
+---
+
+# {skill_name}
+
+## Workflow
+
+{workflow_block}
+
+## References
+
+- `references/auto-optimization.md`
+
+## Scripts
+
+- Add deterministic reusable scripts in `scripts/`.
+""",
+            encoding="utf-8",
+        )
+        created.append(skill_md)
+
+    agent_yaml = skill_dir / "agents/openai.yaml"
+    if not agent_yaml.exists():
+        agent_yaml.write_text(
+            f"""schema_version: "v1"
+display_name: "{skill_name}"
+short_description: "Auto-generated from dashboard recommendation"
+default_prompt: "Use this skill when tasks match its workflow and validation gates."
+""",
+            encoding="utf-8",
+        )
+        created.append(agent_yaml)
+    return created
+
+
+def apply_optimization_updates(
+    skill_dir: Path,
+    skill_name: str,
+    task_type: str,
+    mode: str,
+    optimization_status: str,
+    opportunity_score: str,
+    report_file: str,
+    findings: Sequence[str],
+    suggested_actions: Sequence[str],
+    top_root_causes: Sequence[str],
+) -> List[Path]:
+    applied: List[Path] = []
+    references_dir = skill_dir / "references"
+    references_dir.mkdir(parents=True, exist_ok=True)
+
+    findings_list = [item.strip() for item in findings if str(item).strip()]
+    actions_list = [item.strip() for item in suggested_actions if str(item).strip()]
+    roots_list = [item.strip() for item in top_root_causes if str(item).strip()]
+    if not findings_list:
+        findings_list = ["No major regression signal detected in selected range."]
+    if not actions_list:
+        actions_list = ["Keep current workflow and continue monitoring weekly."]
+    if not roots_list:
+        roots_list = ["none"]
+
+    timestamp = datetime.now().isoformat(timespec="seconds")
+    log_file = references_dir / "auto-optimization.md"
+    log_lines = [
+        f"## {timestamp}",
+        f"- mode: {mode}",
+        f"- skill: {skill_name}",
+        f"- task_type: {task_type or 'n/a'}",
+        f"- optimization_status: {optimization_status or 'unknown'}",
+        f"- opportunity_score: {opportunity_score or 'n/a'}",
+        f"- source_report: {report_file or 'n/a'}",
+        "",
+        "### Findings",
+    ]
+    log_lines.extend(f"- {item}" for item in findings_list)
+    log_lines.append("")
+    log_lines.append("### Suggested Actions")
+    log_lines.extend(f"- {item}" for item in actions_list)
+    log_lines.append("")
+    log_lines.append("### Top Root Causes")
+    log_lines.extend(f"- {item}" for item in roots_list)
+    entry = "\n".join(log_lines).strip() + "\n"
+    if log_file.exists():
+        previous = log_file.read_text(encoding="utf-8").rstrip()
+        next_text = (previous + "\n\n" + entry).strip() + "\n"
+    else:
+        next_text = "# Auto Optimization Log\n\n" + entry
+    log_file.write_text(next_text, encoding="utf-8")
+    applied.append(log_file)
+
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.exists():
+        raise RuntimeError(f"missing SKILL.md at {skill_md}")
+    current = skill_md.read_text(encoding="utf-8")
+    snapshot_lines = [
+        f"- updated_at: {timestamp}",
+        f"- mode: {mode}",
+        f"- task_type: {task_type or 'n/a'}",
+        f"- optimization_status: {optimization_status or 'unknown'}",
+        f"- opportunity_score: {opportunity_score or 'n/a'}",
+        f"- source_report: {report_file or 'n/a'}",
+        "- top_actions:",
+    ]
+    snapshot_lines.extend(f"  - {item}" for item in actions_list[:5])
+    snapshot_lines.append("- top_root_causes:")
+    snapshot_lines.extend(f"  - {item}" for item in roots_list[:5])
+    snapshot_lines.append("- optimization_log: `references/auto-optimization.md`")
+    snapshot_body = "\n".join(snapshot_lines)
+    if AUTO_OPT_START in current and AUTO_OPT_END in current:
+        start = current.index(AUTO_OPT_START)
+        end = current.index(AUTO_OPT_END, start) + len(AUTO_OPT_END)
+        replaced = (
+            current[:start]
+            + f"{AUTO_OPT_START}\n{snapshot_body}\n{AUTO_OPT_END}"
+            + current[end:]
+        )
+    else:
+        suffix = "" if current.endswith("\n") else "\n"
+        replaced = (
+            current
+            + suffix
+            + "\n## Auto Optimization Snapshot\n"
+            + f"{AUTO_OPT_START}\n{snapshot_body}\n{AUTO_OPT_END}\n"
+        )
+    if replaced != current:
+        skill_md.write_text(replaced, encoding="utf-8")
+        applied.append(skill_md)
+    return applied
+
+
 class DashboardHandler(BaseHTTPRequestHandler):
     runtime_paths: RuntimePaths
 
@@ -1574,12 +1885,28 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._bad_request("request body must be an object")
             return
 
+        target = str(payload.get("target", "existing")).strip().lower()
         skill = str(payload.get("skill", "")).strip()
+        task_type = str(payload.get("task_type", "")).strip()
         start = str(payload.get("start", "")).strip()
         end = str(payload.get("end", "")).strip()
         cutover = str(payload.get("cutover", "")).strip()
+        findings = _ensure_str_list(payload.get("findings"))
+        if not findings:
+            findings = _ensure_str_list(payload.get("reasons"))
+        suggested_actions = _ensure_str_list(payload.get("suggested_actions"))
+        top_root_causes = _ensure_str_list(payload.get("top_root_causes"))
+        status_hint = str(payload.get("status", "")).strip()
+        score_hint = str(payload.get("score", "")).strip()
+
+        if target not in {"existing", "new"}:
+            self._bad_request("field `target` must be `existing` or `new`")
+            return
         if not skill:
             self._bad_request("field `skill` is required")
+            return
+        if target == "new" and not task_type:
+            self._bad_request("field `task_type` is required for new-skill optimization")
             return
 
         validation_error = self._validate_filters(start, end, cutover)
@@ -1587,7 +1914,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._bad_request(validation_error)
             return
 
-        cmd: List[str] = [str(self.runtime_paths.optimize_script), "--skill", skill]
+        normalized_skill = _to_kebab(skill)
+        optimize_skill_name = skill if target == "existing" else normalized_skill
+        cmd: List[str] = [str(self.runtime_paths.optimize_script), "--skill", optimize_skill_name]
         if start:
             cmd.extend(["--start", start])
         if end:
@@ -1600,12 +1929,70 @@ class DashboardHandler(BaseHTTPRequestHandler):
         except RuntimeError as exc:
             self._bad_request(str(exc))
             return
+
+        report_file = parse_key_value_from_output(output, "generated optimization report")
+        optimization_status = parse_key_value_from_output(output, "optimization_status") or status_hint
+        opportunity_score = parse_key_value_from_output(output, "opportunity_score") or score_hint
+
+        if target == "existing":
+            skill_dir = resolve_existing_skill_dir(self.runtime_paths, skill)
+            created_files: List[Path] = []
+            if skill_dir is None:
+                skill_dir = self.runtime_paths.local_skills_dir / normalized_skill
+                created_files = create_skill_scaffold(
+                    skill_dir=skill_dir,
+                    skill_name=normalized_skill,
+                    task_type=task_type or "general",
+                    suggested_actions=suggested_actions,
+                )
+            applied_files = apply_optimization_updates(
+                skill_dir=skill_dir,
+                skill_name=optimize_skill_name,
+                task_type=task_type,
+                mode="existing",
+                optimization_status=optimization_status,
+                opportunity_score=opportunity_score,
+                report_file=report_file,
+                findings=findings,
+                suggested_actions=suggested_actions,
+                top_root_causes=top_root_causes,
+            )
+            action = "optimize-existing-skill-now"
+        else:
+            skill_dir = self.runtime_paths.local_skills_dir / normalized_skill
+            created_files = create_skill_scaffold(
+                skill_dir=skill_dir,
+                skill_name=normalized_skill,
+                task_type=task_type,
+                suggested_actions=suggested_actions,
+            )
+            applied_files = apply_optimization_updates(
+                skill_dir=skill_dir,
+                skill_name=normalized_skill,
+                task_type=task_type,
+                mode="new",
+                optimization_status=optimization_status,
+                opportunity_score=opportunity_score,
+                report_file=report_file,
+                findings=findings,
+                suggested_actions=suggested_actions,
+                top_root_causes=top_root_causes,
+            )
+            action = "create-and-optimize-new-skill-now"
+
         self._json(
             {
-                "skill": skill,
-                "report_file": parse_key_value_from_output(output, "generated optimization report"),
-                "optimization_status": parse_key_value_from_output(output, "optimization_status"),
-                "opportunity_score": parse_key_value_from_output(output, "opportunity_score"),
+                "action": action,
+                "target": target,
+                "skill": optimize_skill_name,
+                "task_type": task_type,
+                "skill_dir": str(skill_dir),
+                "created_skill": bool(created_files),
+                "created_files": [str(path) for path in created_files],
+                "applied_files": [str(path) for path in applied_files],
+                "report_file": report_file,
+                "optimization_status": optimization_status,
+                "opportunity_score": opportunity_score,
                 "raw_output": output,
                 "generated_at": datetime.now().isoformat(timespec="seconds"),
             }

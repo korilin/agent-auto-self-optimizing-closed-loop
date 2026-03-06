@@ -17,7 +17,7 @@ Use this skill to operationalize and measure continuous optimization in any proj
 - Do not ask the user to run logging/report commands manually when this skill is active.
 - At task completion, run `scripts/auto_run_loop.sh` automatically with task metadata.
 - Use `scripts/dashboard_server.sh` for interactive filtering instead of manual output parsing.
-- Use dashboard optimization discovery and allow manual trigger via `scripts/optimize_skill.sh`.
+- Use dashboard optimization discovery and run optimize/create actions immediately from the page.
 
 ## Mandatory Guarantees
 
@@ -58,8 +58,8 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 "${SKILL_HOME}/scripts/dashboard_server.sh" --host 127.0.0.1 --port 8765
 ```
 
-Use `Skill Optimization Discovery` in the dashboard to trigger per-skill optimization plans.
-Use `New Skill Recommendations` to identify and prioritize candidate new skills.
+Use `Skill Optimization Discovery` in the dashboard to optimize existing skills immediately.
+Use `New Skill Recommendations` to create-and-optimize candidate new skills immediately.
 
 5. Optional direct commands (if you need script-level outputs):
 ```bash

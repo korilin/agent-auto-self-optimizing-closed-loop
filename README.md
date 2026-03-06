@@ -1,6 +1,6 @@
 # Agent Auto Self-Optimizing Closed Loop (User Guide)
 
-<!-- README_SYNC_VERSION: 2026-03-05 -->
+<!-- README_SYNC_VERSION: 2026-03-06 -->
 
 This project helps you run a measurable self-optimization loop for AI coding work.
 If your goal is to use the skill in your own repository, this file is the entry point.
@@ -21,7 +21,7 @@ After setup, you get a repeatable loop with concrete outputs:
 1. Automatic run logging + metrics + weekly review with one command.
 2. Skill impact reports (`token_reduction_pct`, `duration_reduction_pct`, etc.).
 3. Filterable local web dashboard (date, skill, cutover, metric key filter).
-4. Skill optimization discovery with manual trigger for self-optimization plans.
+4. Skill optimization discovery with immediate optimize/create actions from dashboard.
 5. Clear pre/post comparison around a chosen cutover date.
 
 In your project, data is stored under `.agent-loop-data/`:
@@ -89,7 +89,7 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 If runtime telemetry is available, pass `total_tokens` / `duration_sec` (or set env vars like
 `CODEX_TOTAL_TOKENS` and `CODEX_TASK_DURATION_SEC`) to avoid placeholder zeros.
 
-2. Open dashboard for filtering, optimization discovery, and manual trigger:
+2. Open dashboard for filtering, optimization discovery, and direct optimization:
 
 ```bash
 SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
@@ -97,8 +97,8 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 ```
 
 Then open `http://127.0.0.1:8765`.
-Use the `Skill Optimization Discovery` section to trigger optimization for one skill.
-Use `New Skill Recommendations` to identify where a brand-new skill should be added.
+Use the `Skill Optimization Discovery` section to optimize one skill immediately.
+Use `New Skill Recommendations` to create-and-optimize a new skill immediately.
 
 3. Optional direct report commands (if you need raw CLI output):
 

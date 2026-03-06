@@ -2,3 +2,4 @@ date,task_id,task_type,project,model,used_skill,skill_name,total_tokens,duration
 # 2026-03-04,TASK-0001,debug,core-service,gpt-5,true,log-analysis-helper,1820,420,true,0
 2026-03-06,TASK-20260306-AOSO-001,ops,agent-auto-self-optimizing-closed-loop,gpt-5,true,aoso-repo-maintainer,0,0,true,0
 2026-03-06,TASK-20260306-DASHBOARD-I18N,dashboard-i18n,agent-auto-self-optimizing-closed-loop,gpt-5,true,aoso-repo-maintainer,0,0,true,0
+2026-03-06,TASK-20260306-DASHBOARD-INSTANT-OPT,dashboard,agent-auto-self-optimizing-closed-loop,gpt-5,true,aoso-repo-maintainer,0,0,true,0
