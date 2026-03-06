@@ -95,6 +95,7 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 
 Then open `http://127.0.0.1:8765`.
 Use the `Skill Optimization Discovery` section to trigger optimization for one skill.
+Use `New Skill Recommendations` to identify where a brand-new skill should be added.
 
 3. Optional direct report commands (if you need raw CLI output):
 

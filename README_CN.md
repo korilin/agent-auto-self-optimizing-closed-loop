@@ -95,6 +95,7 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 
 然后访问 `http://127.0.0.1:8765`。
 在 `Skill Optimization Discovery` 区域可直接触发对应 skill 的优化方案生成。
+在 `New Skill Recommendations` 区域可查看“建议新增 skill”及对应理由。
 
 3. 如需原始命令输出（可选）：
 

@@ -104,7 +104,7 @@ AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv \
 1. 在工程 `AGENTS.md` 加约定：命中 `.agent-loop-data/skills/<skill>/SKILL.md` 时先用对应 skill。
 2. 每个任务结束执行 `auto_run_loop.sh`，由脚本自动采集和分析。
 3. 每个失败事件写一条 error entry（脚本自动分析会读取这些条目）。
-4. 用 dashboard 做日期/skill/指标筛选，查看 `Skill Optimization Discovery` 并按需手动触发优化。
+4. 用 dashboard 做日期/skill/指标筛选，查看 `Skill Optimization Discovery`（优化现有 skill）和 `New Skill Recommendations`（建议新增 skill）。
 5. 把确认有效的规则与优化结果回写到 `AGENTS.md` 或 skill。
 
 ## 如何评估是否有效

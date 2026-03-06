@@ -52,6 +52,7 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 ```
 
 Use `Skill Optimization Discovery` in the dashboard to trigger per-skill optimization plans.
+Use `New Skill Recommendations` to identify and prioritize candidate new skills.
 
 5. Optional direct commands (if you need script-level outputs):
 ```bash

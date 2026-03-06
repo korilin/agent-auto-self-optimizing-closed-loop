@@ -15,7 +15,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime
 from http import HTTPStatus
@@ -212,6 +212,31 @@ HTML_PAGE = """<!doctype html>
       opacity: 0.6;
       cursor: not-allowed;
     }
+    .rec-wrap {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .rec-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+    }
+    .code-chip {
+      display: block;
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      background: #f2efe8;
+      border: 1px solid #dbd2c3;
+      color: #2b3338;
+      font-size: 12px;
+      font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
     details {
       border: 1px solid var(--line);
       border-radius: 10px;
@@ -236,6 +261,7 @@ HTML_PAGE = """<!doctype html>
       .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .op-wrap { grid-template-columns: 1fr; }
+      .rec-wrap { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
       .grid { grid-template-columns: 1fr; }
@@ -281,6 +307,8 @@ HTML_PAGE = """<!doctype html>
       <ul class="list" id="sections"></ul>
       <h3 style="margin: 12px 0 8px; font-size: 16px;">Skill Optimization Discovery</h3>
       <div class="op-wrap" id="opportunities"></div>
+      <h3 style="margin: 12px 0 8px; font-size: 16px;">New Skill Recommendations</h3>
+      <div class="rec-wrap" id="newSkillRecommendations"></div>
       <details>
         <summary>Optimization Trigger Log</summary>
         <pre id="optimizeLog"></pre>
@@ -312,6 +340,7 @@ HTML_PAGE = """<!doctype html>
       cards: document.getElementById("cards"),
       sections: document.getElementById("sections"),
       opportunities: document.getElementById("opportunities"),
+      newSkillRecommendations: document.getElementById("newSkillRecommendations"),
       optimizeLog: document.getElementById("optimizeLog"),
       overallRaw: document.getElementById("overallRaw"),
       skillRaw: document.getElementById("skillRaw"),
@@ -407,6 +436,39 @@ HTML_PAGE = """<!doctype html>
       }
     }
 
+    function renderNewSkillRecommendations(items) {
+      nodes.newSkillRecommendations.innerHTML = "";
+      if (!items || items.length === 0) {
+        nodes.newSkillRecommendations.innerHTML =
+          '<div class="rec-card"><p class="op-title">No new skill recommendation in selected range.</p></div>';
+        return;
+      }
+      for (const item of items) {
+        const card = document.createElement("div");
+        card.className = "rec-card";
+        const findings = (item.findings || []).map((f) => `<li>${f}</li>`).join("");
+        const actions = (item.suggested_actions || []).map((a) => `<li>${a}</li>`).join("");
+        const roots = (item.top_root_causes || []).map((c) => `<li>${c}</li>`).join("");
+        const status = item.status || "watch";
+        card.innerHTML = `
+          <div class="op-head">
+            <p class="op-title">${item.task_type}</p>
+            <span class="badge ${status}">${statusLabel(status)}</span>
+          </div>
+          <p class="op-score">score=${item.score} | sample=${item.sample_size} | coverage=${item.skill_coverage_pct}</p>
+          <div style="font-size:12px; margin-bottom:6px;">Suggested new skill</div>
+          <div class="code-chip">${item.suggested_skill_name}</div>
+          <div style="font-size:12px; margin:8px 0 6px;">Findings</div>
+          <ul class="mini-list">${findings || "<li>none</li>"}</ul>
+          <div style="font-size:12px; margin:8px 0 6px;">Suggested actions</div>
+          <ul class="mini-list">${actions || "<li>none</li>"}</ul>
+          <div style="font-size:12px; margin:8px 0 6px;">Top root causes</div>
+          <ul class="mini-list">${roots || "<li>none</li>"}</ul>
+        `;
+        nodes.newSkillRecommendations.appendChild(card);
+      }
+    }
+
     async function triggerOptimization(skill) {
       const payload = {
         skill,
@@ -449,6 +511,7 @@ HTML_PAGE = """<!doctype html>
         renderCards(metrics, metricFilter);
         renderSections(report.sections || []);
         renderOpportunities(report.opportunities || []);
+        renderNewSkillRecommendations(report.new_skill_recommendations || []);
         nodes.overallRaw.textContent = report.overall_raw || "";
         nodes.skillRaw.textContent = report.skill_raw || "(no skill query)";
         nodes.weeklyRaw.textContent = report.weekly_raw || "(empty)";
@@ -703,6 +766,193 @@ def _unique_ordered(values: Sequence[str]) -> List[str]:
         seen.add(value)
         out.append(value)
     return out
+
+
+def _row_int(row: Dict[str, str], key: str) -> int:
+    value = row.get(key, "").strip()
+    try:
+        return int(value)
+    except ValueError:
+        return 0
+
+
+def _row_used_skill(row: Dict[str, str]) -> bool:
+    return row.get("used_skill", "").strip().lower() == "true"
+
+
+def _row_success(row: Dict[str, str]) -> bool:
+    return row.get("success", "").strip().lower() == "true"
+
+
+def _to_kebab(value: str) -> str:
+    chars: List[str] = []
+    for ch in value.strip().lower():
+        if ch.isalnum():
+            chars.append(ch)
+        else:
+            chars.append("-")
+    raw = "".join(chars)
+    while "--" in raw:
+        raw = raw.replace("--", "-")
+    return raw.strip("-") or "workflow"
+
+
+def _top_root_causes_for_task_type(
+    task_type: str, kb_entries: Sequence[Dict[str, str]]
+) -> List[str]:
+    counter: Counter[str] = Counter()
+    for entry in kb_entries:
+        if entry.get("task_type", "").strip() != task_type:
+            continue
+        cause = entry.get("root_cause", "").strip()
+        if cause:
+            counter[cause] += 1
+    return [f"{count}x {cause}" for cause, count in counter.most_common(3)]
+
+
+def _count_from_root_cause_label(value: str) -> int:
+    prefix = value.split("x ", 1)[0].strip()
+    try:
+        return int(prefix)
+    except ValueError:
+        return 0
+
+
+def discover_new_skill_recommendations(
+    filtered_rows: Sequence[Dict[str, str]],
+    kb_entries: Sequence[Dict[str, str]],
+) -> List[Dict[str, object]]:
+    if not filtered_rows:
+        return []
+
+    existing_skills = set(collect_skills(filtered_rows))
+
+    total_tokens = sum(_row_int(row, "total_tokens") for row in filtered_rows)
+    total_duration = sum(_row_int(row, "duration_sec") for row in filtered_rows)
+    total_rows = len(filtered_rows)
+    overall_avg_tokens = (total_tokens / total_rows) if total_rows > 0 else 0.0
+    overall_avg_duration = (total_duration / total_rows) if total_rows > 0 else 0.0
+    overall_fail_rate = (
+        sum(1 for row in filtered_rows if not _row_success(row)) / total_rows
+        if total_rows > 0
+        else 0.0
+    )
+    overall_rework_rate = (
+        sum(_row_int(row, "rework_count") for row in filtered_rows) / total_rows
+        if total_rows > 0
+        else 0.0
+    )
+
+    by_task_all: Dict[str, List[Dict[str, str]]] = defaultdict(list)
+    by_task_no_skill: Dict[str, List[Dict[str, str]]] = defaultdict(list)
+    for row in filtered_rows:
+        task_type = row.get("task_type", "").strip()
+        if not task_type:
+            continue
+        by_task_all[task_type].append(row)
+        if not _row_used_skill(row):
+            by_task_no_skill[task_type].append(row)
+
+    recommendations: List[Dict[str, object]] = []
+    for task_type, rows in by_task_no_skill.items():
+        if not rows:
+            continue
+        sample_size = len(rows)
+        all_rows_for_type = by_task_all.get(task_type, [])
+        skill_used_count = sum(1 for row in all_rows_for_type if _row_used_skill(row))
+        coverage = (
+            (skill_used_count / len(all_rows_for_type)) * 100
+            if all_rows_for_type
+            else 0.0
+        )
+
+        avg_tokens = sum(_row_int(row, "total_tokens") for row in rows) / sample_size
+        avg_duration = sum(_row_int(row, "duration_sec") for row in rows) / sample_size
+        fail_rate = sum(1 for row in rows if not _row_success(row)) / sample_size
+        rework_rate = sum(_row_int(row, "rework_count") for row in rows) / sample_size
+        top_root_causes = _top_root_causes_for_task_type(task_type, kb_entries)
+        recurring_root_cause = any(
+            _count_from_root_cause_label(cause) >= 2 for cause in top_root_causes
+        )
+
+        score = 0
+        findings: List[str] = []
+        actions: List[str] = []
+
+        if sample_size >= 3:
+            score += 40
+            findings.append(f"Workflow repeats frequently without skill (count={sample_size}).")
+            actions.append("Create a dedicated skill workflow for this task type.")
+
+        if overall_avg_tokens > 0 and avg_tokens >= overall_avg_tokens * 1.2 and sample_size >= 3:
+            score += 25
+            findings.append(
+                f"Token cost is high for no-skill runs (avg={avg_tokens:.2f}, overall={overall_avg_tokens:.2f})."
+            )
+            actions.append("Move deterministic steps into scripts and keep prompts minimal.")
+
+        if overall_avg_duration > 0 and avg_duration >= overall_avg_duration * 1.2 and sample_size >= 3:
+            score += 15
+            findings.append(
+                f"Duration is high for no-skill runs (avg={avg_duration:.2f}, overall={overall_avg_duration:.2f})."
+            )
+            actions.append("Design a shorter skill path with explicit checkpoints.")
+
+        if fail_rate >= max(0.2, overall_fail_rate + 0.1) and sample_size >= 3:
+            score += 20
+            findings.append(
+                f"Failure rate is high (task={fail_rate * 100:.2f}%, overall={overall_fail_rate * 100:.2f}%)."
+            )
+            actions.append("Add stronger validation and recovery steps in the new skill.")
+
+        if rework_rate >= overall_rework_rate + 0.5 and sample_size >= 3:
+            score += 15
+            findings.append(
+                f"Rework rate is elevated (task={rework_rate:.2f}, overall={overall_rework_rate:.2f})."
+            )
+            actions.append("Include prevention rules and trigger signals in skill guidance.")
+
+        if recurring_root_cause:
+            score += 30
+            findings.append("Root cause recurs for this task type in error KB.")
+            actions.append("Capture recurring root-cause handling directly in the new skill.")
+
+        suggested_skill_name = _to_kebab(f"{task_type}-workflow-optimizer")
+        if suggested_skill_name in existing_skills:
+            continue
+
+        if score < 50:
+            continue
+
+        if score >= 70:
+            status = "needs_optimization"
+        else:
+            status = "watch"
+
+        if coverage >= 70.0:
+            # This task type is already covered by existing skills frequently.
+            continue
+
+        recommendations.append(
+            {
+                "task_type": task_type,
+                "suggested_skill_name": suggested_skill_name,
+                "status": status,
+                "score": score,
+                "sample_size": sample_size,
+                "skill_coverage_pct": f"{coverage:.2f}%",
+                "avg_tokens": f"{avg_tokens:.2f}",
+                "avg_duration_sec": f"{avg_duration:.2f}",
+                "fail_rate_pct": f"{fail_rate * 100:.2f}%",
+                "rework_rate": f"{rework_rate:.3f}",
+                "findings": _unique_ordered(findings),
+                "suggested_actions": _unique_ordered(actions),
+                "top_root_causes": top_root_causes,
+            }
+        )
+
+    recommendations.sort(key=lambda item: int(item.get("score", 0)), reverse=True)
+    return recommendations
 
 
 def load_kb_entries(kb_dir: Path, start: str, end: str) -> List[Dict[str, str]]:
@@ -1059,6 +1309,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     "row_count": 0,
                     "sections": [],
                     "flat_metrics": {},
+                    "opportunities": [],
+                    "new_skill_recommendations": [],
                     "overall_raw": "No data file found or no header row.",
                     "skill_raw": "",
                     "weekly_raw": "",
@@ -1073,6 +1325,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
         with tempfile.TemporaryDirectory(prefix="aoso-dashboard-") as tmp_dir:
             tmp_csv = Path(tmp_dir) / "filtered.csv"
             write_filtered_csv(fieldnames, filtered_rows, tmp_csv)
+            kb_entries = load_kb_entries(self.runtime_paths.kb_dir, start, end)
 
             metrics_cmd: List[str] = [str(self.runtime_paths.metrics_script), "--all"]
             if cutover:
@@ -1099,6 +1352,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 end,
                 cutover,
             )
+            new_skill_recommendations = discover_new_skill_recommendations(
+                filtered_rows,
+                kb_entries,
+            )
 
         sections = parse_metrics_output("\n".join([overall_raw, skill_raw]).strip())
         payload = {
@@ -1106,6 +1363,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             "sections": sections,
             "flat_metrics": flatten_metrics(sections),
             "opportunities": opportunities,
+            "new_skill_recommendations": new_skill_recommendations,
             "overall_raw": overall_raw,
             "skill_raw": skill_raw,
             "weekly_raw": weekly_raw,
