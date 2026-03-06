@@ -86,6 +86,9 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --rework-count 0
 ```
 
+If runtime telemetry is available, pass `total_tokens` / `duration_sec` (or set env vars like
+`CODEX_TOTAL_TOKENS` and `CODEX_TASK_DURATION_SEC`) to avoid placeholder zeros.
+
 2. Open dashboard for filtering, optimization discovery, and manual trigger:
 
 ```bash

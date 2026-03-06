@@ -86,6 +86,9 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --rework-count 0
 ```
 
+如果运行时能提供真实遥测，请传入 `total_tokens` / `duration_sec`
+（或设置 `CODEX_TOTAL_TOKENS`、`CODEX_TASK_DURATION_SEC`），避免写入占位 0 值。
+
 2. 打开看板做筛选、优化发现和手动触发：
 
 ```bash

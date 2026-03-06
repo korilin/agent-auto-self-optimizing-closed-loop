@@ -22,12 +22,13 @@ project="${AOSO_PROJECT:-$(basename "${workspace_dir}")}"
 model="${AOSO_MODEL:-gpt-5}"
 used_skill="${AOSO_USED_SKILL:-true}"
 skill_name="${AOSO_SKILL_NAME:-agent-self-optimizing-loop}"
-total_tokens="${AOSO_TOTAL_TOKENS:-0}"
-duration_sec="${AOSO_DURATION_SEC:-0}"
+total_tokens="${AOSO_TOTAL_TOKENS:-}"
+duration_sec="${AOSO_DURATION_SEC:-}"
 success="${AOSO_SUCCESS:-true}"
 rework_count="${AOSO_REWORK_COUNT:-0}"
 cutover="${AOSO_CUTOVER:-}"
 run_weekly="true"
+enforce_telemetry="false"
 
 usage() {
   cat <<'EOF'
@@ -48,6 +49,7 @@ Options:
   --date <YYYY-MM-DD>
   --cutover <YYYY-MM-DD>
   --skip-weekly
+  --enforce-telemetry
 
 Description:
   Automatically run the self-optimizing loop:
@@ -55,7 +57,39 @@ Description:
   2) log one task run
   3) run metrics reports
   4) run weekly review (unless --skip-weekly)
+
+Telemetry values are resolved in this order:
+  - explicit CLI args (--total-tokens / --duration-sec)
+  - env overrides:
+      tokens: AOSO_TOTAL_TOKENS, CODEX_TOTAL_TOKENS, OPENAI_TOTAL_TOKENS, TASK_TOTAL_TOKENS
+      duration: AOSO_DURATION_SEC, CODEX_TASK_DURATION_SEC, TASK_DURATION_SEC
+  - fallback duration from task start timestamp:
+      AOSO_TASK_START_TS or TASK_START_TS (unix epoch seconds)
+  - final fallback: 0
 EOF
+}
+
+first_non_empty() {
+  for value in "$@"; do
+    if [[ -n "${value}" ]]; then
+      printf '%s' "${value}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_duration_from_start_ts() {
+  local start_ts="$1"
+  if [[ ! "${start_ts}" =~ ^[0-9]+$ ]]; then
+    return 1
+  fi
+  local now_ts
+  now_ts="$(date +%s)"
+  if [[ "${now_ts}" -lt "${start_ts}" ]]; then
+    return 1
+  fi
+  printf '%s' "$((now_ts - start_ts))"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -73,6 +107,7 @@ while [[ $# -gt 0 ]]; do
     --date) date_val="${2:-}"; shift 2 ;;
     --cutover) cutover="${2:-}"; shift 2 ;;
     --skip-weekly) run_weekly="false"; shift ;;
+    --enforce-telemetry) enforce_telemetry="true"; shift ;;
     -h|--help) usage; exit 0 ;;
     *)
       echo "unknown argument: $1"
@@ -93,6 +128,53 @@ fi
 
 if [[ "${used_skill}" == "false" ]]; then
   skill_name=""
+fi
+
+if [[ -z "${total_tokens}" ]]; then
+  total_tokens="$(first_non_empty \
+    "${AOSO_TOTAL_TOKENS:-}" \
+    "${CODEX_TOTAL_TOKENS:-}" \
+    "${OPENAI_TOTAL_TOKENS:-}" \
+    "${TASK_TOTAL_TOKENS:-}" || true)"
+fi
+
+if [[ -z "${duration_sec}" ]]; then
+  duration_sec="$(first_non_empty \
+    "${AOSO_DURATION_SEC:-}" \
+    "${CODEX_TASK_DURATION_SEC:-}" \
+    "${TASK_DURATION_SEC:-}" || true)"
+fi
+
+if [[ -z "${duration_sec}" ]]; then
+  duration_sec="$(resolve_duration_from_start_ts "$(first_non_empty \
+    "${AOSO_TASK_START_TS:-}" \
+    "${TASK_START_TS:-}" || true)" || true)"
+fi
+
+if [[ -z "${total_tokens}" ]]; then
+  total_tokens="0"
+fi
+if [[ -z "${duration_sec}" ]]; then
+  duration_sec="0"
+fi
+
+if [[ ! "${total_tokens}" =~ ^[0-9]+$ ]]; then
+  echo "error: resolved total_tokens is not an integer: ${total_tokens}"
+  exit 1
+fi
+if [[ ! "${duration_sec}" =~ ^[0-9]+$ ]]; then
+  echo "error: resolved duration_sec is not an integer: ${duration_sec}"
+  exit 1
+fi
+
+if [[ "${enforce_telemetry}" == "true" && ( "${total_tokens}" == "0" || "${duration_sec}" == "0" ) ]]; then
+  echo "error: telemetry missing while --enforce-telemetry is enabled"
+  echo "hint: pass --total-tokens/--duration-sec or set telemetry env vars"
+  exit 1
+fi
+
+if [[ "${total_tokens}" == "0" || "${duration_sec}" == "0" ]]; then
+  echo "warning: telemetry incomplete (total_tokens=${total_tokens}, duration_sec=${duration_sec})"
 fi
 
 metrics_args=(--all)

@@ -19,6 +19,13 @@ Use this skill to operationalize and measure continuous optimization in any proj
 - Use `scripts/dashboard_server.sh` for interactive filtering instead of manual output parsing.
 - Use dashboard optimization discovery and allow manual trigger via `scripts/optimize_skill.sh`.
 
+## Mandatory Guarantees
+
+- `agent-self-optimizing-loop` must persist one task record for every completed task.
+- A task should not be reported complete before `scripts/auto_run_loop.sh` succeeds.
+- Prefer real telemetry values for `total_tokens` and `duration_sec`.
+- If runtime telemetry is unavailable, explicitly mark this as telemetry gap and fix the integration.
+
 ## Primary Workflow
 
 1. Initialize project data once:

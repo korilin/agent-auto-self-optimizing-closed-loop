@@ -23,6 +23,23 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --success true
 ```
 
+## 2b) Auto-run with telemetry from runtime env
+
+```bash
+SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
+CODEX_TOTAL_TOKENS=1820 \
+CODEX_TASK_DURATION_SEC=420 \
+"${SKILL_HOME}/scripts/auto_run_loop.sh" \
+  --task-id TASK-1002 \
+  --task-type debug \
+  --project my-service \
+  --model gpt-5 \
+  --used-skill true \
+  --skill-name log-analysis-helper \
+  --success true \
+  --enforce-telemetry
+```
+
 ## 3) Log one task run (direct)
 
 ```bash
