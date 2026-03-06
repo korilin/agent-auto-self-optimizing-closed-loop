@@ -273,67 +273,200 @@ HTML_PAGE = """<!doctype html>
 <body>
   <div class="wrap">
     <section class="hero">
-      <h1>Self-Optimizing Loop Dashboard</h1>
-      <p>Filter by date, skill, cutover, and metric key. The page executes local project scripts to load data.</p>
+      <h1 data-i18n="hero_title">Self-Optimizing Loop Dashboard</h1>
+      <p data-i18n="hero_subtitle">Filter by date, skill, cutover, and metric key. The page executes local project scripts to load data.</p>
     </section>
 
     <section class="filters">
       <div class="grid">
-        <label>Start Date
+        <label><span data-i18n="label_start_date">Start Date</span>
           <input id="startDate" type="date" />
         </label>
-        <label>End Date
+        <label><span data-i18n="label_end_date">End Date</span>
           <input id="endDate" type="date" />
         </label>
-        <label>Cutover
+        <label><span data-i18n="label_cutover">Cutover</span>
           <input id="cutoverDate" type="date" />
         </label>
-        <label>Skill
+        <label><span data-i18n="label_skill">Skill</span>
           <select id="skillName"><option value="">(all)</option></select>
         </label>
-        <label>Metric Key Filter
-          <input id="metricFilter" type="text" placeholder="token|duration|success" />
+        <label><span data-i18n="label_metric_filter">Metric Key Filter</span>
+          <input id="metricFilter" type="text" placeholder="token|duration|success" data-i18n-placeholder="placeholder_metric_filter" />
+        </label>
+        <label><span data-i18n="label_language">Language</span>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+          </select>
         </label>
       </div>
       <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
-        <button id="refreshBtn" type="button">Refresh Dashboard</button>
+        <button id="refreshBtn" type="button" data-i18n="btn_refresh">Refresh Dashboard</button>
       </div>
       <div class="hint" id="hint"></div>
     </section>
 
     <section class="panel">
-      <div class="meta" id="metaText">Loading...</div>
+      <div class="meta" id="metaText" data-i18n="meta_loading">Loading...</div>
       <div class="cards" id="cards"></div>
       <ul class="list" id="sections"></ul>
-      <h3 style="margin: 12px 0 8px; font-size: 16px;">Skill Optimization Discovery</h3>
+      <h3 style="margin: 12px 0 8px; font-size: 16px;" data-i18n="title_skill_opt_discovery">Skill Optimization Discovery</h3>
       <div class="op-wrap" id="opportunities"></div>
-      <h3 style="margin: 12px 0 8px; font-size: 16px;">New Skill Recommendations</h3>
+      <h3 style="margin: 12px 0 8px; font-size: 16px;" data-i18n="title_new_skill_recommendations">New Skill Recommendations</h3>
       <div class="rec-wrap" id="newSkillRecommendations"></div>
       <details>
-        <summary>Optimization Trigger Log</summary>
+        <summary data-i18n="summary_opt_log">Optimization Trigger Log</summary>
         <pre id="optimizeLog"></pre>
       </details>
       <details>
-        <summary>Raw Overall Output</summary>
+        <summary data-i18n="summary_raw_overall">Raw Overall Output</summary>
         <pre id="overallRaw"></pre>
       </details>
       <details>
-        <summary>Raw Skill Output</summary>
+        <summary data-i18n="summary_raw_skill">Raw Skill Output</summary>
         <pre id="skillRaw"></pre>
       </details>
       <details>
-        <summary>Weekly Review (Last 7 Days of Selected Range)</summary>
+        <summary data-i18n="summary_weekly_review">Weekly Review (Last 7 Days of Selected Range)</summary>
         <pre id="weeklyRaw"></pre>
       </details>
     </section>
   </div>
 
   <script>
+    const I18N = {
+      en: {
+        hero_title: "Self-Optimizing Loop Dashboard",
+        hero_subtitle: "Filter by date, skill, cutover, and metric key. The page executes local project scripts to load data.",
+        label_start_date: "Start Date",
+        label_end_date: "End Date",
+        label_cutover: "Cutover",
+        label_skill: "Skill",
+        label_metric_filter: "Metric Key Filter",
+        placeholder_metric_filter: "token|duration|success",
+        label_language: "Language",
+        btn_refresh: "Refresh Dashboard",
+        meta_loading: "Loading...",
+        title_skill_opt_discovery: "Skill Optimization Discovery",
+        title_new_skill_recommendations: "New Skill Recommendations",
+        summary_opt_log: "Optimization Trigger Log",
+        summary_raw_overall: "Raw Overall Output",
+        summary_raw_skill: "Raw Skill Output",
+        summary_weekly_review: "Weekly Review (Last 7 Days of Selected Range)",
+        option_all: "(all)",
+        status_unknown: "unknown",
+        status_no_data: "no data",
+        status_healthy: "healthy",
+        status_watch: "watch",
+        status_needs_optimization: "needs optimization",
+        msg_no_metrics_match: "No metrics matched filter.",
+        msg_no_skill_rows: "No skill rows for selected range.",
+        msg_no_new_skill_rec: "No new skill recommendation in selected range.",
+        label_findings: "Findings",
+        label_suggested_actions: "Suggested actions",
+        label_top_root_causes: "Top root causes",
+        label_suggested_new_skill: "Suggested new skill",
+        label_score: "score",
+        label_sample: "sample",
+        label_coverage: "coverage",
+        label_rows: "rows",
+        label_data_file: "data_file",
+        label_generated_at: "generated_at",
+        btn_trigger_opt: "Trigger Self-Optimization",
+        btn_running: "Running...",
+        btn_triggered: "Triggered",
+        msg_no_skill_query: "(no skill query)",
+        msg_empty: "(empty)",
+        msg_load_failed: "Load failed",
+        msg_init_failed: "Initialization failed",
+        msg_opt_failed: "Optimize failed",
+        log_skill: "skill",
+        log_status: "status",
+        log_score: "score",
+        log_report: "report",
+        label_metrics_count: "metrics",
+        label_none: "none",
+      },
+      zh: {
+        hero_title: "自优化闭环看板",
+        hero_subtitle: "按日期、skill、cutover 和指标关键字筛选。页面会执行项目脚本获取数据。",
+        label_start_date: "开始日期",
+        label_end_date: "结束日期",
+        label_cutover: "切换日期",
+        label_skill: "技能",
+        label_metric_filter: "指标关键字筛选",
+        placeholder_metric_filter: "token|duration|success",
+        label_language: "语言",
+        btn_refresh: "刷新看板",
+        meta_loading: "加载中...",
+        title_skill_opt_discovery: "现有 Skill 优化发现",
+        title_new_skill_recommendations: "新增 Skill 推荐",
+        summary_opt_log: "优化触发日志",
+        summary_raw_overall: "总体原始输出",
+        summary_raw_skill: "单 Skill 原始输出",
+        summary_weekly_review: "周报（筛选区间内最近 7 天）",
+        option_all: "（全部）",
+        status_unknown: "未知",
+        status_no_data: "无数据",
+        status_healthy: "健康",
+        status_watch: "观察",
+        status_needs_optimization: "需要优化",
+        msg_no_metrics_match: "没有匹配筛选条件的指标。",
+        msg_no_skill_rows: "当前筛选区间没有 skill 数据。",
+        msg_no_new_skill_rec: "当前筛选区间暂无新增 skill 推荐。",
+        label_findings: "发现",
+        label_suggested_actions: "建议动作",
+        label_top_root_causes: "高频根因",
+        label_suggested_new_skill: "建议新增 skill 名称",
+        label_score: "评分",
+        label_sample: "样本",
+        label_coverage: "覆盖率",
+        label_rows: "行数",
+        label_data_file: "数据文件",
+        label_generated_at: "生成时间",
+        btn_trigger_opt: "触发自优化",
+        btn_running: "执行中...",
+        btn_triggered: "已触发",
+        msg_no_skill_query: "（未指定 skill 查询）",
+        msg_empty: "（空）",
+        msg_load_failed: "加载失败",
+        msg_init_failed: "初始化失败",
+        msg_opt_failed: "优化触发失败",
+        log_skill: "skill",
+        log_status: "状态",
+        log_score: "评分",
+        log_report: "报告",
+        label_metrics_count: "指标",
+        label_none: "无",
+      },
+    };
+
+    let currentLang = localStorage.getItem("aoso_dashboard_lang") || "en";
+    if (!I18N[currentLang]) currentLang = "en";
+    let lastReport = null;
+
+    function t(key) {
+      const dict = I18N[currentLang] || I18N.en;
+      return dict[key] || I18N.en[key] || key;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLang === "zh" ? "zh-CN" : "en";
+      for (const el of document.querySelectorAll("[data-i18n]")) {
+        el.textContent = t(el.dataset.i18n);
+      }
+      for (const el of document.querySelectorAll("[data-i18n-placeholder]")) {
+        el.placeholder = t(el.dataset.i18nPlaceholder);
+      }
+    }
+
     const nodes = {
       startDate: document.getElementById("startDate"),
       endDate: document.getElementById("endDate"),
       cutoverDate: document.getElementById("cutoverDate"),
       skillName: document.getElementById("skillName"),
+      languageSelect: document.getElementById("languageSelect"),
       metricFilter: document.getElementById("metricFilter"),
       refreshBtn: document.getElementById("refreshBtn"),
       hint: document.getElementById("hint"),
@@ -359,7 +492,7 @@ HTML_PAGE = """<!doctype html>
       nodes.endDate.value = payload.default_end || "";
       nodes.cutoverDate.value = payload.default_cutover || "";
       const current = nodes.skillName.value;
-      nodes.skillName.innerHTML = '<option value="">(all)</option>';
+      nodes.skillName.innerHTML = `<option value="">${t("option_all")}</option>`;
       for (const skill of payload.skills || []) {
         const opt = document.createElement("option");
         opt.value = skill;
@@ -378,7 +511,7 @@ HTML_PAGE = """<!doctype html>
       nodes.cards.innerHTML = "";
       const entries = Object.entries(metrics || {}).filter(([k]) => matchMetricFilter(k, metricFilter));
       if (entries.length === 0) {
-        nodes.cards.innerHTML = '<div class="card"><div class="k">status</div><div class="v">No metrics matched filter.</div></div>';
+        nodes.cards.innerHTML = `<div class="card"><div class="k">${t("log_status")}</div><div class="v">${t("msg_no_metrics_match")}</div></div>`;
         return;
       }
       for (const [key, value] of entries) {
@@ -393,21 +526,21 @@ HTML_PAGE = """<!doctype html>
       nodes.sections.innerHTML = "";
       for (const sec of sections || []) {
         const li = document.createElement("li");
-        li.textContent = `${sec.title} (${Object.keys(sec.metrics || {}).length} metrics)`;
+        li.textContent = `${sec.title} (${Object.keys(sec.metrics || {}).length} ${t("label_metrics_count")})`;
         nodes.sections.appendChild(li);
       }
     }
 
     function statusLabel(raw) {
-      if (!raw) return "unknown";
-      return raw.replaceAll("_", " ");
+      if (!raw) return t("status_unknown");
+      return t(`status_${raw}`);
     }
 
     function renderOpportunities(items) {
       nodes.opportunities.innerHTML = "";
       if (!items || items.length === 0) {
         nodes.opportunities.innerHTML =
-          '<div class="op-card"><p class="op-title">No skill rows for selected range.</p></div>';
+          `<div class="op-card"><p class="op-title">${t("msg_no_skill_rows")}</p></div>`;
         return;
       }
       for (const item of items) {
@@ -423,14 +556,14 @@ HTML_PAGE = """<!doctype html>
             <p class="op-title">${item.skill}</p>
             <span class="badge ${status}">${statusLabel(status)}</span>
           </div>
-          <p class="op-score">score=${item.score} | sample=${item.sample_size_skill}</p>
-          <div style="font-size:12px; margin-bottom:6px;">Findings</div>
-          <ul class="mini-list">${reasons || "<li>none</li>"}</ul>
-          <div style="font-size:12px; margin:8px 0 6px;">Suggested actions</div>
-          <ul class="mini-list">${actions || "<li>none</li>"}</ul>
-          <div style="font-size:12px; margin:8px 0 6px;">Top root causes</div>
-          <ul class="mini-list">${roots || "<li>none</li>"}</ul>
-          <button class="trigger-btn" data-skill="${item.skill}" ${disabled}>Trigger Self-Optimization</button>
+          <p class="op-score">${t("label_score")}=${item.score} | ${t("label_sample")}=${item.sample_size_skill}</p>
+          <div style="font-size:12px; margin-bottom:6px;">${t("label_findings")}</div>
+          <ul class="mini-list">${reasons || `<li>${t("label_none")}</li>`}</ul>
+          <div style="font-size:12px; margin:8px 0 6px;">${t("label_suggested_actions")}</div>
+          <ul class="mini-list">${actions || `<li>${t("label_none")}</li>`}</ul>
+          <div style="font-size:12px; margin:8px 0 6px;">${t("label_top_root_causes")}</div>
+          <ul class="mini-list">${roots || `<li>${t("label_none")}</li>`}</ul>
+          <button class="trigger-btn" data-skill="${item.skill}" data-default-label="${t("btn_trigger_opt")}" ${disabled}>${t("btn_trigger_opt")}</button>
         `;
         nodes.opportunities.appendChild(card);
       }
@@ -440,7 +573,7 @@ HTML_PAGE = """<!doctype html>
       nodes.newSkillRecommendations.innerHTML = "";
       if (!items || items.length === 0) {
         nodes.newSkillRecommendations.innerHTML =
-          '<div class="rec-card"><p class="op-title">No new skill recommendation in selected range.</p></div>';
+          `<div class="rec-card"><p class="op-title">${t("msg_no_new_skill_rec")}</p></div>`;
         return;
       }
       for (const item of items) {
@@ -455,15 +588,15 @@ HTML_PAGE = """<!doctype html>
             <p class="op-title">${item.task_type}</p>
             <span class="badge ${status}">${statusLabel(status)}</span>
           </div>
-          <p class="op-score">score=${item.score} | sample=${item.sample_size} | coverage=${item.skill_coverage_pct}</p>
-          <div style="font-size:12px; margin-bottom:6px;">Suggested new skill</div>
+          <p class="op-score">${t("label_score")}=${item.score} | ${t("label_sample")}=${item.sample_size} | ${t("label_coverage")}=${item.skill_coverage_pct}</p>
+          <div style="font-size:12px; margin-bottom:6px;">${t("label_suggested_new_skill")}</div>
           <div class="code-chip">${item.suggested_skill_name}</div>
-          <div style="font-size:12px; margin:8px 0 6px;">Findings</div>
-          <ul class="mini-list">${findings || "<li>none</li>"}</ul>
-          <div style="font-size:12px; margin:8px 0 6px;">Suggested actions</div>
-          <ul class="mini-list">${actions || "<li>none</li>"}</ul>
-          <div style="font-size:12px; margin:8px 0 6px;">Top root causes</div>
-          <ul class="mini-list">${roots || "<li>none</li>"}</ul>
+          <div style="font-size:12px; margin:8px 0 6px;">${t("label_findings")}</div>
+          <ul class="mini-list">${findings || `<li>${t("label_none")}</li>`}</ul>
+          <div style="font-size:12px; margin:8px 0 6px;">${t("label_suggested_actions")}</div>
+          <ul class="mini-list">${actions || `<li>${t("label_none")}</li>`}</ul>
+          <div style="font-size:12px; margin:8px 0 6px;">${t("label_top_root_causes")}</div>
+          <ul class="mini-list">${roots || `<li>${t("label_none")}</li>`}</ul>
         `;
         nodes.newSkillRecommendations.appendChild(card);
       }
@@ -487,10 +620,10 @@ HTML_PAGE = """<!doctype html>
       const data = await response.json();
       const now = new Date().toISOString();
       const line = [
-        `[${now}] skill=${skill}`,
-        `status=${data.optimization_status || "unknown"}`,
-        `score=${data.opportunity_score || "n/a"}`,
-        `report=${data.report_file || "n/a"}`,
+        `[${now}] ${t("log_skill")}=${skill}`,
+        `${t("log_status")}=${data.optimization_status || t("status_unknown")}`,
+        `${t("log_score")}=${data.opportunity_score || "n/a"}`,
+        `${t("log_report")}=${data.report_file || "n/a"}`,
       ].join(" | ");
       nodes.optimizeLog.textContent = `${line}\n${nodes.optimizeLog.textContent || ""}`.trim();
       return data;
@@ -513,39 +646,63 @@ HTML_PAGE = """<!doctype html>
         renderOpportunities(report.opportunities || []);
         renderNewSkillRecommendations(report.new_skill_recommendations || []);
         nodes.overallRaw.textContent = report.overall_raw || "";
-        nodes.skillRaw.textContent = report.skill_raw || "(no skill query)";
-        nodes.weeklyRaw.textContent = report.weekly_raw || "(empty)";
+        nodes.skillRaw.textContent = report.skill_raw || t("msg_no_skill_query");
+        nodes.weeklyRaw.textContent = report.weekly_raw || t("msg_empty");
         nodes.metaText.textContent =
-          `rows=${report.row_count} | data_file=${report.data_file} | generated_at=${report.generated_at}`;
+          `${t("label_rows")}=${report.row_count} | ${t("label_data_file")}=${report.data_file} | ${t("label_generated_at")}=${report.generated_at}`;
+        lastReport = report;
       } catch (err) {
-        nodes.hint.textContent = `Load failed: ${err.message}`;
+        nodes.hint.textContent = `${t("msg_load_failed")}: ${err.message}`;
       }
     }
 
     async function boot() {
       try {
         const options = await fetchJSON("/api/options");
+        nodes.languageSelect.value = currentLang;
+        applyLanguage();
         renderOptions(options);
         await refreshDashboard();
       } catch (err) {
-        nodes.hint.textContent = `Initialization failed: ${err.message}`;
+        nodes.hint.textContent = `${t("msg_init_failed")}: ${err.message}`;
       }
     }
 
     nodes.refreshBtn.addEventListener("click", refreshDashboard);
+    nodes.languageSelect.addEventListener("change", () => {
+      currentLang = nodes.languageSelect.value === "zh" ? "zh" : "en";
+      localStorage.setItem("aoso_dashboard_lang", currentLang);
+      applyLanguage();
+      if (lastReport) {
+        renderOptions({
+          default_start: nodes.startDate.value,
+          default_end: nodes.endDate.value,
+          default_cutover: nodes.cutoverDate.value,
+          skills: Array.from(nodes.skillName.options).map((o) => o.value).filter(Boolean),
+        });
+        renderCards(lastReport.flat_metrics || {}, nodes.metricFilter.value.trim());
+        renderSections(lastReport.sections || []);
+        renderOpportunities(lastReport.opportunities || []);
+        renderNewSkillRecommendations(lastReport.new_skill_recommendations || []);
+        nodes.skillRaw.textContent = lastReport.skill_raw || t("msg_no_skill_query");
+        nodes.weeklyRaw.textContent = lastReport.weekly_raw || t("msg_empty");
+        nodes.metaText.textContent =
+          `${t("label_rows")}=${lastReport.row_count} | ${t("label_data_file")}=${lastReport.data_file} | ${t("label_generated_at")}=${lastReport.generated_at}`;
+      }
+    });
     nodes.opportunities.addEventListener("click", async (event) => {
       const btn = event.target.closest(".trigger-btn");
       if (!btn) return;
       const skill = btn.getAttribute("data-skill");
       if (!skill) return;
       btn.disabled = true;
-      const old = btn.textContent;
-      btn.textContent = "Running...";
+      const old = btn.getAttribute("data-default-label") || t("btn_trigger_opt");
+      btn.textContent = t("btn_running");
       try {
         await triggerOptimization(skill);
-        btn.textContent = "Triggered";
+        btn.textContent = t("btn_triggered");
       } catch (err) {
-        nodes.hint.textContent = `Optimize failed: ${err.message}`;
+        nodes.hint.textContent = `${t("msg_opt_failed")}: ${err.message}`;
         btn.textContent = old;
       } finally {
         setTimeout(() => {
