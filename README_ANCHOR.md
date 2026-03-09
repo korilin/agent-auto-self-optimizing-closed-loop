@@ -82,10 +82,11 @@ skills/aoso-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"
 1. 脚本会在提交前自动执行 `./scripts/auto_run_loop.sh`，落盘 task-run 数据并刷新指标。
 2. 然后执行 `git add -A`。
 3. 若无变更会直接退出，不会创建空提交。
-4. 若有变更会创建一次非交互提交。
+4. 若有变更会创建一次非交互提交，并默认自动 `git push` 到当前分支远端。
 5. 可选参数：
    - `--enforce-telemetry`：若 token/耗时遥测缺失则阻止提交。
    - `--skip-loop`：仅在特殊场景下跳过自动落盘。
+   - `--no-push`：仅在特殊场景下跳过自动推送。
 
 ## 5. 作者日常运行节奏（建议）
 

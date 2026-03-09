@@ -118,45 +118,24 @@ aoso-skill update
 
 ### Complete Closed-Loop Flow
 
-```mermaid
-flowchart TD
-  A["Task Starts in Project"] --> B["Use Existing Skill / Baseline Workflow"]
-  B --> C["Task Delivery"]
-  C --> D["auto_run_loop.sh (automatic)"]
-  D --> E["Record Run Metrics<br/>task-runs.csv<br/>total_tokens,duration,success,rework"]
-  D --> F["Generate Reports<br/>metrics_report + weekly_review"]
-  D --> G["Update Dashboard Data"]
-
-  E --> H["Dashboard Filtering<br/>date, skill, task_type, metric key, cutover"]
-  F --> H
-  G --> H
-
-  H --> I["Optimization Discovery<br/>existing skill opportunities"]
-  H --> J["New Skill Recommendations<br/>missing-skill opportunities"]
-
-  I --> K["Trigger Optimize (Now)"]
-  J --> L["Trigger Create + Optimize (Now)"]
-
-  K --> M["optimize_skill.sh + skill updates"]
-  L --> M
-  M --> N["Optimization Report + Skill Artifacts"]
-  N --> O["Next Tasks Reuse Updated Skill"]
-  O --> P["Observe KPI Delta<br/>tokens,duration,success,rework,hit-rate"]
-
-  P --> Q{"Improvement Verified?"}
-  Q -->|Yes| R["Promote Stable Rules<br/>AGENTS.md + SKILL.md"]
-  Q -->|No| S["Keep Baseline Sampling / Refine Plan"]
-  R --> B
-  S --> B
-```
+![AOSO closed-loop flow](docs/assets/self-optimization-closed-loop-flow.png)
 
 How to read this flow:
 
-1. Every completed task writes one standardized run record.
-2. Reports and dashboard always read from the same local data source (`.agent-loop-data/`).
-3. Optimization can be triggered directly from dashboard for both existing skills and new-skill recommendations.
-4. Optimized artifacts are applied immediately and reused by subsequent tasks.
-5. Only verified gains should be promoted into long-term governance (`AGENTS.md`) and stable skill instructions.
+1. Discovery timing:
+- On every completed task (`auto_run_loop.sh`) and every dashboard refresh (`/api/report`), opportunities are recalculated from latest local data.
+2. Discovery mechanism:
+- `metrics_report.sh` + weekly review + opportunity scoring + new-skill recommendation logic drive optimization candidates.
+3. Where records are saved:
+- Run data: `.agent-loop-data/metrics/task-runs.csv`
+- Error KB: `.agent-loop-data/knowledge-base/errors/*.md`
+- Optimization reports: `.agent-loop-data/reports/skill-optimization/*`
+4. Where optimization status is saved:
+- `.agent-loop-data/reports/dashboard-optimization-state.json`
+- This file is shared by the project, so different browsers can see the same optimized/created status.
+5. Status transition:
+- `DISCOVERED -> TRIGGERED -> APPLIED -> VERIFIED -> PROMOTED`
+- Only `VERIFIED` improvements should be promoted to `AGENTS.md` / stable skills.
 
 ## 5. How to Interpret Results Correctly
 

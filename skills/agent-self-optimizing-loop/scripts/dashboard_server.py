@@ -488,34 +488,8 @@ HTML_PAGE = """<!doctype html>
     let currentLang = localStorage.getItem("aoso_dashboard_lang") || "en";
     if (!I18N[currentLang]) currentLang = "en";
     let lastReport = null;
-    const OPT_STATE_KEY = "aoso_dashboard_opt_state_v1";
-
-    function loadOptimizationState() {
-      try {
-        const raw = localStorage.getItem(OPT_STATE_KEY);
-        if (!raw) {
-          return { existing: [], newlyCreated: [] };
-        }
-        const parsed = JSON.parse(raw);
-        const existing = Array.isArray(parsed.existing) ? parsed.existing : [];
-        const newlyCreated = Array.isArray(parsed.newlyCreated) ? parsed.newlyCreated : [];
-        return { existing, newlyCreated };
-      } catch (_) {
-        return { existing: [], newlyCreated: [] };
-      }
-    }
-
-    function saveOptimizationState() {
-      const payload = {
-        existing: Array.from(optimizedExistingSkills.values()),
-        newlyCreated: Array.from(optimizedNewSkills.values()),
-      };
-      localStorage.setItem(OPT_STATE_KEY, JSON.stringify(payload));
-    }
-
-    const initialOptState = loadOptimizationState();
-    const optimizedExistingSkills = new Set(initialOptState.existing);
-    const optimizedNewSkills = new Set(initialOptState.newlyCreated);
+    const optimizedExistingSkills = new Set();
+    const optimizedNewSkills = new Set();
 
     function t(key) {
       const dict = I18N[currentLang] || I18N.en;
@@ -560,6 +534,19 @@ HTML_PAGE = """<!doctype html>
 
     function newSkillKey(skill, taskType) {
       return `${skill || ""}::${taskType || ""}`;
+    }
+
+    function applyOptimizationState(statePayload) {
+      optimizedExistingSkills.clear();
+      optimizedNewSkills.clear();
+      const existing = (statePayload && Array.isArray(statePayload.existing)) ? statePayload.existing : [];
+      const newlyCreated = (statePayload && Array.isArray(statePayload.newly_created)) ? statePayload.newly_created : [];
+      for (const skill of existing) {
+        optimizedExistingSkills.add(skill);
+      }
+      for (const key of newlyCreated) {
+        optimizedNewSkills.add(key);
+      }
     }
 
     function setHint(kind, message) {
@@ -739,6 +726,7 @@ HTML_PAGE = """<!doctype html>
       try {
         const report = await fetchJSON(`/api/report?${params.toString()}`);
         const metrics = report.flat_metrics || {};
+        applyOptimizationState(report.optimization_state || {});
         renderCards(metrics, metricFilter);
         renderSections(report.sections || []);
         renderOpportunities(report.opportunities || []);
@@ -796,6 +784,7 @@ HTML_PAGE = """<!doctype html>
       try {
         const data = await postOptimize(payload);
         appendOptimizeLog(data, payload.skill || "");
+        applyOptimizationState(data.optimization_state || {});
         if (typeof onSuccess === "function") {
           onSuccess(data);
         }
@@ -842,7 +831,6 @@ HTML_PAGE = """<!doctype html>
         `${t("msg_opt_done")}: ${skill}`,
         () => {
           optimizedExistingSkills.add(skill);
-          saveOptimizationState();
         },
       );
     });
@@ -874,7 +862,6 @@ HTML_PAGE = """<!doctype html>
         `${t("msg_create_done")}: ${skill}`,
         () => {
           optimizedNewSkills.add(newSkillKey(skill, taskType));
-          saveOptimizationState();
         },
       );
     });
@@ -909,6 +896,7 @@ class RuntimePaths:
     metrics_script: Path
     weekly_script: Path
     optimize_script: Path
+    optimization_state_file: Path
 
 
 def resolve_runtime_paths() -> RuntimePaths:
@@ -940,6 +928,12 @@ def resolve_runtime_paths() -> RuntimePaths:
     local_skills_dir = Path(
         os.environ.get("AOSO_LOCAL_SKILLS_DIR", str(local_skills_dir_default))
     ).resolve()
+    optimization_state_file = Path(
+        os.environ.get(
+            "AOSO_DASHBOARD_STATE_FILE",
+            str(report_dir / "dashboard-optimization-state.json"),
+        )
+    ).resolve()
 
     return RuntimePaths(
         script_dir=script_dir,
@@ -952,6 +946,7 @@ def resolve_runtime_paths() -> RuntimePaths:
         metrics_script=script_dir / "metrics_report.sh",
         weekly_script=script_dir / "weekly_review.sh",
         optimize_script=script_dir / "optimize_skill.sh",
+        optimization_state_file=optimization_state_file,
     )
 
 
@@ -979,6 +974,91 @@ def read_task_rows(data_file: Path) -> Tuple[List[str], List[Dict[str, str]]]:
         fieldnames = reader.fieldnames or []
         rows = [row for row in reader]
     return fieldnames, rows
+
+
+def load_dashboard_optimization_state(state_file: Path) -> Dict[str, Dict[str, Dict[str, str]]]:
+    empty: Dict[str, Dict[str, Dict[str, str]]] = {"existing": {}, "new": {}}
+    if not state_file.exists():
+        return empty
+    try:
+        payload = json.loads(state_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return empty
+    if not isinstance(payload, dict):
+        return empty
+
+    def _normalize_bucket(raw: object) -> Dict[str, Dict[str, str]]:
+        if isinstance(raw, list):
+            normalized_from_list: Dict[str, Dict[str, str]] = {}
+            for item in raw:
+                if isinstance(item, str) and item:
+                    normalized_from_list[item] = {}
+            return normalized_from_list
+        if not isinstance(raw, dict):
+            return {}
+        normalized: Dict[str, Dict[str, str]] = {}
+        for key, value in raw.items():
+            key_str = str(key).strip()
+            if not key_str:
+                continue
+            if isinstance(value, dict):
+                normalized[key_str] = {
+                    str(sub_key): str(sub_val)
+                    for sub_key, sub_val in value.items()
+                    if sub_val is not None
+                }
+            else:
+                normalized[key_str] = {}
+        return normalized
+
+    return {
+        "existing": _normalize_bucket(payload.get("existing")),
+        "new": _normalize_bucket(payload.get("new")),
+    }
+
+
+def save_dashboard_optimization_state(
+    state_file: Path, state: Dict[str, Dict[str, Dict[str, str]]]
+) -> None:
+    state_file.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(state, ensure_ascii=True, indent=2, sort_keys=True)
+    state_file.write_text(payload + "\n", encoding="utf-8")
+
+
+def state_payload_for_api(
+    state: Dict[str, Dict[str, Dict[str, str]]], state_file: Path
+) -> Dict[str, object]:
+    return {
+        "existing": sorted(state.get("existing", {}).keys()),
+        "newly_created": sorted(state.get("new", {}).keys()),
+        "state_file": str(state_file),
+    }
+
+
+def mark_dashboard_optimization_state(
+    state_file: Path,
+    target: str,
+    skill: str,
+    task_type: str,
+    action: str,
+    report_file: str,
+    optimization_status: str,
+    opportunity_score: str,
+) -> Dict[str, Dict[str, Dict[str, str]]]:
+    state = load_dashboard_optimization_state(state_file)
+    bucket = state["existing"] if target == "existing" else state["new"]
+    key = skill if target == "existing" else f"{skill}::{task_type}"
+    bucket[key] = {
+        "skill": skill,
+        "task_type": task_type,
+        "action": action,
+        "optimization_status": optimization_status,
+        "opportunity_score": opportunity_score,
+        "report_file": report_file,
+        "updated_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    save_dashboard_optimization_state(state_file, state)
+    return state
 
 
 def filter_rows(
@@ -1855,6 +1935,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
 
         fieldnames, rows = read_task_rows(self.runtime_paths.data_file)
+        optimization_state = load_dashboard_optimization_state(
+            self.runtime_paths.optimization_state_file
+        )
         if not fieldnames:
             self._json(
                 {
@@ -1868,6 +1951,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     "weekly_raw": "",
                     "generated_at": datetime.now().isoformat(timespec="seconds"),
                     "data_file": str(self.runtime_paths.data_file),
+                    "optimization_state": state_payload_for_api(
+                        optimization_state, self.runtime_paths.optimization_state_file
+                    ),
                 }
             )
             return
@@ -1921,6 +2007,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             "weekly_raw": weekly_raw,
             "generated_at": datetime.now().isoformat(timespec="seconds"),
             "data_file": str(self.runtime_paths.data_file),
+            "optimization_state": state_payload_for_api(
+                optimization_state, self.runtime_paths.optimization_state_file
+            ),
         }
         self._json(payload)
 
@@ -2064,6 +2153,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
             )
             action = "create-and-optimize-new-skill-now"
 
+        optimization_state = mark_dashboard_optimization_state(
+            state_file=self.runtime_paths.optimization_state_file,
+            target=target,
+            skill=optimize_skill_name,
+            task_type=task_type,
+            action=action,
+            report_file=report_file,
+            optimization_status=optimization_status,
+            opportunity_score=opportunity_score,
+        )
+
         self._json(
             {
                 "action": action,
@@ -2077,6 +2177,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "report_file": report_file,
                 "optimization_status": optimization_status,
                 "opportunity_score": opportunity_score,
+                "optimization_state": state_payload_for_api(
+                    optimization_state, self.runtime_paths.optimization_state_file
+                ),
                 "raw_output": output,
                 "generated_at": datetime.now().isoformat(timespec="seconds"),
             }

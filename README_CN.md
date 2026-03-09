@@ -118,45 +118,24 @@ aoso-skill update
 
 ### 完整闭环流程图
 
-```mermaid
-flowchart TD
-  A["项目中开始任务"] --> B["优先复用已有 Skill / Baseline 流程"]
-  B --> C["任务交付"]
-  C --> D["auto_run_loop.sh（自动执行）"]
-  D --> E["记录任务指标<br/>task-runs.csv<br/>total_tokens,duration,success,rework"]
-  D --> F["生成报告<br/>metrics_report + weekly_review"]
-  D --> G["刷新 Dashboard 数据"]
-
-  E --> H["Dashboard 筛选<br/>日期、skill、task_type、指标、cutover"]
-  F --> H
-  G --> H
-
-  H --> I["优化机会发现<br/>现有 skill 优化项"]
-  H --> J["新增 Skill 推荐<br/>缺失能力补齐项"]
-
-  I --> K["立即触发优化"]
-  J --> L["立即创建并优化"]
-
-  K --> M["optimize_skill.sh + skill 文件更新"]
-  L --> M
-  M --> N["产出优化报告 + Skill 产物"]
-  N --> O["后续任务复用新版本 Skill"]
-  O --> P["观察 KPI 变化<br/>tokens,duration,success,rework,hit-rate"]
-
-  P --> Q{"效果是否验证通过？"}
-  Q -->|是| R["沉淀长期规则<br/>AGENTS.md + SKILL.md"]
-  Q -->|否| S["继续补 baseline 或调整优化方案"]
-  R --> B
-  S --> B
-```
+![AOSO 闭环流程图](docs/assets/self-optimization-closed-loop-flow.png)
 
 这张图的阅读顺序：
 
-1. 每个完成任务都会写入一条标准化运行记录。
-2. 报告和看板都基于同一份本地数据源（`.agent-loop-data/`）。
-3. 现有 skill 优化与新增 skill 推荐都可在看板里直接触发执行。
-4. 优化结果会立即应用，并被后续任务复用。
-5. 只有验证有收益的策略才应沉淀到长期治理规则（`AGENTS.md`）和稳定 skill 指令。
+1. 优化发现时机：
+- 每次任务完成触发 `auto_run_loop.sh`，以及每次 dashboard 刷新 `/api/report` 时都会重新计算优化机会。
+2. 优化发现机制：
+- 基于 `metrics_report.sh`、weekly review、机会评分和新增 skill 推荐逻辑得出候选项。
+3. 数据记录保存位置：
+- 运行记录：`.agent-loop-data/metrics/task-runs.csv`
+- 失败知识库：`.agent-loop-data/knowledge-base/errors/*.md`
+- 优化报告：`.agent-loop-data/reports/skill-optimization/*`
+4. 优化状态保存位置：
+- `.agent-loop-data/reports/dashboard-optimization-state.json`
+- 这是项目共享文件，所以换浏览器后仍能看到已优化/已创建状态。
+5. 状态变化链路：
+- `DISCOVERED -> TRIGGERED -> APPLIED -> VERIFIED -> PROMOTED`
+- 只有 `VERIFIED` 的收益才建议沉淀到 `AGENTS.md` 与稳定 skill。
 
 ## 5. 如何正确解读输出
 

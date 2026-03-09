@@ -6,6 +6,7 @@ commit_message="chore(repo): automated workflow commit $(date +%Y-%m-%d)"
 run_loop="true"
 enforce_telemetry="false"
 run_weekly="false"
+run_push="true"
 
 date_val="$(date +%Y-%m-%d)"
 task_id="TASK-$(date +%Y%m%d-%H%M%S)"
@@ -43,6 +44,7 @@ Options:
   --skip-loop
   --enforce-telemetry
   --run-weekly
+  --no-push
   --task-id <id>
   --task-type <type>
   --project <name>
@@ -60,6 +62,7 @@ Description:
   1) Auto-run task logging + metrics before commit (default on)
   2) Stage all repository changes
   3) Create one commit non-interactively
+  4) Push commit to remote branch (default on)
 EOF
 }
 
@@ -79,6 +82,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --run-weekly)
       run_weekly="true"
+      shift
+      ;;
+    --no-push)
+      run_push="false"
       shift
       ;;
     --task-id)
@@ -202,3 +209,11 @@ git diff --cached --name-only | sed 's/^/  - /'
 
 git commit -m "${commit_message}"
 echo "created commit: $(git rev-parse --short HEAD)"
+
+if [[ "${run_push}" == "true" ]]; then
+  echo "pushing commit to remote..."
+  git push
+  echo "push completed"
+else
+  echo "skip push: --no-push"
+fi
