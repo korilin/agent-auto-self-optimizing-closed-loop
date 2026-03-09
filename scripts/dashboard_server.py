@@ -2034,7 +2034,7 @@ description: Auto-generated skill for {task_type_value} tasks from dashboard rec
 
 ## References
 
-- `references/auto-optimization.md`
+- Use project report logs under `.agent-loop-data/reports/optimization-history/`.
 
 ## Scripts
 
@@ -2069,10 +2069,9 @@ def apply_optimization_updates(
     findings: Sequence[str],
     suggested_actions: Sequence[str],
     top_root_causes: Sequence[str],
+    optimization_log_file: Optional[Path] = None,
 ) -> List[Path]:
     applied: List[Path] = []
-    references_dir = skill_dir / "references"
-    references_dir.mkdir(parents=True, exist_ok=True)
 
     findings_list = [item.strip() for item in findings if str(item).strip()]
     actions_list = [item.strip() for item in suggested_actions if str(item).strip()]
@@ -2085,7 +2084,8 @@ def apply_optimization_updates(
         roots_list = ["none"]
 
     timestamp = datetime.now().isoformat(timespec="seconds")
-    log_file = references_dir / "auto-optimization.md"
+    log_file = optimization_log_file or (skill_dir / "references" / "auto-optimization.md")
+    log_file.parent.mkdir(parents=True, exist_ok=True)
     log_lines = [
         f"## {timestamp}",
         f"- mode: {mode}",
@@ -2129,7 +2129,7 @@ def apply_optimization_updates(
     snapshot_lines.extend(f"  - {item}" for item in actions_list[:5])
     snapshot_lines.append("- top_root_causes:")
     snapshot_lines.extend(f"  - {item}" for item in roots_list[:5])
-    snapshot_lines.append("- optimization_log: `references/auto-optimization.md`")
+    snapshot_lines.append(f"- optimization_log: `{log_file}`")
     snapshot_body = "\n".join(snapshot_lines)
     if AUTO_OPT_START in current and AUTO_OPT_END in current:
         start = current.index(AUTO_OPT_START)
@@ -2424,6 +2424,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
         report_file = parse_key_value_from_output(output, "generated optimization report")
         optimization_status = parse_key_value_from_output(output, "optimization_status") or status_hint
         opportunity_score = parse_key_value_from_output(output, "opportunity_score") or score_hint
+        optimization_log_file = (
+            self.runtime_paths.report_dir
+            / "optimization-history"
+            / f"{_to_kebab(optimize_skill_name)}.md"
+        )
 
         if target == "existing":
             skill_dir = resolve_existing_skill_dir(self.runtime_paths, skill)
@@ -2447,6 +2452,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 findings=findings,
                 suggested_actions=suggested_actions,
                 top_root_causes=top_root_causes,
+                optimization_log_file=optimization_log_file,
             )
             action = "optimize-existing-skill-now"
         else:
@@ -2468,6 +2474,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 findings=findings,
                 suggested_actions=suggested_actions,
                 top_root_causes=top_root_causes,
+                optimization_log_file=optimization_log_file,
             )
             action = "create-and-optimize-new-skill-now"
 
@@ -2493,6 +2500,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "created_files": [str(path) for path in created_files],
                 "applied_files": [str(path) for path in applied_files],
                 "report_file": report_file,
+                "optimization_log_file": str(optimization_log_file),
                 "optimization_status": optimization_status,
                 "opportunity_score": opportunity_score,
                 "optimization_state": state_payload_for_api(
