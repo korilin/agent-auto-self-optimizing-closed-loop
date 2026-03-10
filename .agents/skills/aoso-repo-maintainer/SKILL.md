@@ -76,7 +76,7 @@ Use `--skip-loop` or `--no-push` only for exceptional cases.
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
 - top_actions:
   - Collect at least 10 no-skill baseline samples on the same task types.
 - top_root_causes:

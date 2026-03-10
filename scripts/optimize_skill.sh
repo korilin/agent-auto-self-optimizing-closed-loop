@@ -12,18 +12,11 @@ if [[ -f "${SCRIPT_DIR}/../SKILL.md" ]]; then
   report_dir_default="${workspace_dir}/.agent-loop-data/reports/skill-optimization"
 else
   mode="root"
-  root_dir="$(cd "${SCRIPT_DIR}/.." && pwd)"
   workspace_dir="${AOSO_WORKSPACE_DIR:-$(pwd)}"
   workspace_dir="$(cd "${workspace_dir}" && pwd)"
-  if [[ "$(basename "${root_dir}")" == ".agent-loop" && "${workspace_dir}" != "${root_dir}" ]]; then
-    data_file_default="${workspace_dir}/.agent-loop-data/metrics/task-runs.csv"
-    kb_dir_default="${workspace_dir}/.agent-loop-data/knowledge-base/errors"
-    report_dir_default="${workspace_dir}/.agent-loop-data/reports/skill-optimization"
-  else
-    data_file_default="${root_dir}/metrics/task-runs.csv"
-    kb_dir_default="${root_dir}/knowledge-base/errors"
-    report_dir_default="${root_dir}/reports/skill-optimization"
-  fi
+  data_file_default="${workspace_dir}/.agent-loop-data/metrics/task-runs.csv"
+  kb_dir_default="${workspace_dir}/.agent-loop-data/knowledge-base/errors"
+  report_dir_default="${workspace_dir}/.agent-loop-data/reports/skill-optimization"
 fi
 
 data_file="${AOSO_DATA_FILE:-${data_file_default}}"
@@ -48,7 +41,7 @@ Options:
 
 Description:
   Analyze one skill, discover optimization opportunities, and generate
-  a markdown optimization plan report under reports/skill-optimization/.
+  a markdown optimization plan report under .agent-loop-data/reports/skill-optimization/.
 EOF
 }
 

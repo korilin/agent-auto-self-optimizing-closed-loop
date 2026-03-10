@@ -2,23 +2,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-if [[ -f "${SCRIPT_DIR}/../SKILL.md" ]]; then
-  WORKSPACE_DIR="${AOSO_WORKSPACE_DIR:-$(pwd)}"
-  WORKSPACE_DIR="$(cd "${WORKSPACE_DIR}" && pwd)"
-  KB_DIR_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/knowledge-base/errors"
-  REPORT_DIR_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/reports"
-else
-  ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-  WORKSPACE_DIR="${AOSO_WORKSPACE_DIR:-$(pwd)}"
-  WORKSPACE_DIR="$(cd "${WORKSPACE_DIR}" && pwd)"
-  if [[ "$(basename "${ROOT_DIR}")" == ".agent-loop" && "${WORKSPACE_DIR}" != "${ROOT_DIR}" ]]; then
-    KB_DIR_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/knowledge-base/errors"
-    REPORT_DIR_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/reports"
-  else
-    KB_DIR_DEFAULT="${ROOT_DIR}/knowledge-base/errors"
-    REPORT_DIR_DEFAULT="${ROOT_DIR}/reports"
-  fi
-fi
+WORKSPACE_DIR="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+WORKSPACE_DIR="$(cd "${WORKSPACE_DIR}" && pwd)"
+KB_DIR_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/knowledge-base/errors"
+REPORT_DIR_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/reports"
 KB_DIR="${AOSO_KB_DIR:-${KB_DIR_DEFAULT}}"
 REPORT_DIR="${AOSO_REPORT_DIR:-${REPORT_DIR_DEFAULT}}"
 

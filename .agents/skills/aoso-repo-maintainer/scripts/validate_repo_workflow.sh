@@ -55,7 +55,7 @@ echo "[3/6] README sync checks"
 
 echo "[4/6] root toolkit smoke test"
 mkdir -p "${tmp_dir}/rootdata/metrics" "${tmp_dir}/rootdata/knowledge-base/errors" "${tmp_dir}/rootdata/reports"
-cp "${repo_root}/metrics/task-runs.csv" "${tmp_dir}/rootdata/metrics/task-runs.csv"
+cp "${repo_root}/.agent-loop-data/metrics/task-runs.csv" "${tmp_dir}/rootdata/metrics/task-runs.csv"
 AOSO_DATA_FILE="${tmp_dir}/rootdata/metrics/task-runs.csv" \
   "${repo_root}/scripts/log_task_run.sh" \
   --task-id "TASK-ROOT-CHECK-1" \

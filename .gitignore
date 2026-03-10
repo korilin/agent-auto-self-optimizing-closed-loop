@@ -4,5 +4,3 @@
 *.swp
 /.idea/
 /.vscode/
-/reports/*.md
-/reports/dashboard-optimization-state.json

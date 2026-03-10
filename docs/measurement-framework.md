@@ -2,7 +2,7 @@
 
 ## Data Model
 
-Use `metrics/task-runs.csv` with one row per completed task:
+Use `.agent-loop-data/metrics/task-runs.csv` with one row per completed task:
 
 - `date`: `YYYY-MM-DD`
 - `task_id`: unique identifier

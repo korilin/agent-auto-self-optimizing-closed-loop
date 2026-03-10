@@ -99,7 +99,7 @@
 1. 每个任务完成后运行 `./scripts/auto_run_loop.sh` 自动执行记录+分析+周报。
 2. 用 `./scripts/dashboard_server.sh` 查看可筛选看板并验证趋势。
 3. 对出现退化的 skill，运行 `./scripts/optimize_skill.sh --skill <name>` 生成优化方案。
-4. 对新增失败在 `knowledge-base/errors/` 建立标准条目。
+4. 对新增失败在 `.agent-loop-data/knowledge-base/errors/` 建立标准条目。
 5. 当重复工作流 >= 3 次/7天，或高成本/重复失败出现时，新增或重构 skill。
 6. 仅在有事故证据或指标收益时，修改 `AGENTS.md` 规则。
 
@@ -148,6 +148,6 @@
 1. 相关脚本和文档已同步。
 2. `check_readme_sync.sh` 通过。
 3. `validate_repo_workflow.sh` 通过。
-4. 若有新增失败案例，已写入 `knowledge-base/errors/YYYY-MM-DD-*.md`。
+4. 若有新增失败案例，已写入 `.agent-loop-data/knowledge-base/errors/YYYY-MM-DD-*.md`。
 5. 如果规则发生变化，`AGENTS.md` 与本文件已更新。
 6. 使用 `auto_commit.sh` 完成提交并确认 commit message 合理。

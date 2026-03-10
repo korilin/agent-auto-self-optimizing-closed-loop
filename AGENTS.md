@@ -68,7 +68,7 @@ Use project-local skill `aoso-repo-maintainer` for repository maintenance tasks:
 
 ## Error KB Policy
 
-For every notable failure, create one file under `knowledge-base/errors/` named:
+For every notable failure, create one file under `.agent-loop-data/knowledge-base/errors/` named:
 
 `YYYY-MM-DD-short-slug.md`
 

@@ -6,7 +6,7 @@
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
 
 ### Findings
 - Insufficient baseline on matching task types.
@@ -23,7 +23,7 @@
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
 
 ### Findings
 - Insufficient baseline on matching task types.
@@ -40,7 +40,7 @@
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
 
 ### Findings
 - Insufficient baseline on matching task types.
@@ -57,7 +57,7 @@
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
 
 ### Findings
 - Insufficient baseline on matching task types.

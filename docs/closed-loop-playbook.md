@@ -15,7 +15,7 @@
 - Confirm changed files and output contract.
 
 4. Capture Learning
-- For failures or high token usage, add one error entry in `knowledge-base/errors/`.
+- For failures or high token usage, add one error entry in `.agent-loop-data/knowledge-base/errors/`.
 
 ## Weekly Loop
 
