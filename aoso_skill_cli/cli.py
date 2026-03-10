@@ -40,8 +40,19 @@ def _run(cmd: list[str], env: Optional[dict[str, str]] = None) -> None:
         merged_env.update(env)
     try:
         subprocess.run(cmd, check=True, env=merged_env)
+    except PermissionError as exc:
+        raise CliError(
+            f"permission denied when executing: {cmd[0]}\n"
+            "hint: check file permissions or invoke shell scripts via bash."
+        ) from exc
     except subprocess.CalledProcessError as exc:
         raise CliError(f"command failed (exit={exc.returncode}): {' '.join(cmd)}") from exc
+
+
+def _run_shell_script(script_path: Path, script_args: list[str], env: Optional[dict[str, str]] = None) -> None:
+    if not script_path.is_file():
+        raise CliError(f"missing script: {script_path}")
+    _run(["/bin/bash", str(script_path), *script_args], env=env)
 
 
 def _install_skill(repo: str, skill_path: str) -> None:
@@ -117,10 +128,7 @@ def _cmd_init(args: argparse.Namespace) -> int:
     )
 
     setup_script = skill_home / "scripts" / "setup_loop_workspace.sh"
-    if not setup_script.is_file():
-        raise CliError(f"missing setup script: {setup_script}")
-
-    _run([str(setup_script), "--workspace", str(workspace)])
+    _run_shell_script(setup_script, ["--workspace", str(workspace)])
 
     if not args.skip_agents:
         agents_file = _upsert_agents_block(workspace)
@@ -140,14 +148,8 @@ def _cmd_dashboard(args: argparse.Namespace) -> int:
     )
 
     dashboard_script = skill_home / "scripts" / "dashboard_server.sh"
-    if not dashboard_script.is_file():
-        raise CliError(f"missing dashboard script: {dashboard_script}")
-
     env = {"AOSO_WORKSPACE_DIR": str(workspace)}
-    _run(
-        [str(dashboard_script), "--host", args.host, "--port", str(args.port)],
-        env=env,
-    )
+    _run_shell_script(dashboard_script, ["--host", args.host, "--port", str(args.port)], env=env)
     return 0
 
 
@@ -159,10 +161,8 @@ def _cmd_run(args: argparse.Namespace) -> int:
         auto_install=not args.no_auto_update,
     )
     auto_run_script = skill_home / "scripts" / "auto_run_loop.sh"
-    if not auto_run_script.is_file():
-        raise CliError(f"missing auto-run script: {auto_run_script}")
     env = {"AOSO_WORKSPACE_DIR": str(workspace)}
-    _run([str(auto_run_script), *args.forward_args], env=env)
+    _run_shell_script(auto_run_script, args.forward_args, env=env)
     return 0
 
 
@@ -174,13 +174,11 @@ def _cmd_metrics(args: argparse.Namespace) -> int:
         auto_install=not args.no_auto_update,
     )
     metrics_script = skill_home / "scripts" / "metrics_report.sh"
-    if not metrics_script.is_file():
-        raise CliError(f"missing metrics script: {metrics_script}")
     env = {"AOSO_WORKSPACE_DIR": str(workspace)}
     forward_args = list(args.forward_args)
     if not forward_args:
         forward_args = ["--all"]
-    _run([str(metrics_script), *forward_args], env=env)
+    _run_shell_script(metrics_script, forward_args, env=env)
     return 0
 
 
@@ -192,10 +190,8 @@ def _cmd_optimize(args: argparse.Namespace) -> int:
         auto_install=not args.no_auto_update,
     )
     optimize_script = skill_home / "scripts" / "optimize_skill.sh"
-    if not optimize_script.is_file():
-        raise CliError(f"missing optimize script: {optimize_script}")
     env = {"AOSO_WORKSPACE_DIR": str(workspace)}
-    _run([str(optimize_script), *args.forward_args], env=env)
+    _run_shell_script(optimize_script, args.forward_args, env=env)
     return 0
 
 
