@@ -65,6 +65,7 @@ Expected result:
 - `.agent-loop-data/knowledge-base/errors/` created.
 - `.agent-loop-data/reports/` created.
 - `.agent-loop-data/templates/error-entry.md` created.
+- `.agent-loop-data/skills` is not created by `init`.
 - `AGENTS.md` gets/refreshes a managed `AOSO-SKILL` block.
 
 ## 4. Daily Workflow (Fully Automated Path)
@@ -99,6 +100,7 @@ aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 Then open `http://127.0.0.1:8765`.
 Use the `Skill Optimization Discovery` section to optimize one skill immediately.
 Use `New Skill Recommendations` to create-and-optimize a new skill immediately.
+New or optimized skill files are written under project `skills/` by default.
 
 3. Optional direct report commands (if you need raw CLI output):
 

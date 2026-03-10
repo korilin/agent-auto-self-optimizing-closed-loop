@@ -1226,14 +1226,14 @@ def resolve_runtime_paths() -> RuntimePaths:
         data_file_default = workspace / ".agent-loop-data/metrics/task-runs.csv"
         kb_dir_default = workspace / ".agent-loop-data/knowledge-base/errors"
         report_dir_default = workspace / ".agent-loop-data/reports"
-        local_skills_dir_default = workspace / ".agent-loop-data/skills"
+        local_skills_dir_default = workspace / "skills"
     else:
         root_dir = script_dir.parent
         if root_dir.name == ".agent-loop" and workspace != root_dir:
             data_file_default = workspace / ".agent-loop-data/metrics/task-runs.csv"
             kb_dir_default = workspace / ".agent-loop-data/knowledge-base/errors"
             report_dir_default = workspace / ".agent-loop-data/reports"
-            local_skills_dir_default = workspace / ".agent-loop-data/skills"
+            local_skills_dir_default = workspace / "skills"
         else:
             data_file_default = root_dir / "metrics/task-runs.csv"
             kb_dir_default = root_dir / "knowledge-base/errors"
@@ -1960,7 +1960,12 @@ def _ensure_str_list(value: object) -> List[str]:
 
 
 def _skill_roots(paths: RuntimePaths) -> List[Path]:
-    roots = [paths.local_skills_dir, paths.workspace_dir / "skills", paths.script_dir.parent / "skills"]
+    roots = [
+        paths.local_skills_dir,
+        paths.workspace_dir / "skills",
+        paths.workspace_dir / ".agent-loop-data/skills",
+        paths.script_dir.parent / "skills",
+    ]
     unique: List[Path] = []
     seen = set()
     for root in roots:

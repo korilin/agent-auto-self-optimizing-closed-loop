@@ -103,3 +103,10 @@ Run `./scripts/weekly_review.sh` once per week and review:
 - Token usage is logged when unusually high.
 - New failures are captured in error KB.
 - Follow-up rule/skill updates are clearly identified.
+
+<!-- AOSO-SKILL:START -->
+## AOSO Skill Integration
+- Always load and use `agent-self-optimizing-loop` for project tasks.
+- At task completion, run `aoso-skill run ...`.
+- Use `aoso-skill dashboard` to open the local dashboard.
+<!-- AOSO-SKILL:END -->

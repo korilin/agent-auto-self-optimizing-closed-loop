@@ -6,3 +6,4 @@
 /.vscode/
 /reports/*.md
 /reports/dashboard-optimization-state.json
+/.agent-loop-data/

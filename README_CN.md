@@ -65,6 +65,7 @@ aoso-skill init --workspace "$(pwd)"
 - 自动创建 `.agent-loop-data/knowledge-base/errors/`。
 - 自动创建 `.agent-loop-data/reports/`。
 - 自动创建 `.agent-loop-data/templates/error-entry.md`。
+- `init` 不会创建 `.agent-loop-data/skills`。
 - 自动更新或创建 `AGENTS.md` 中的 `AOSO-SKILL` 托管区块。
 
 ## 4. 日常使用路径（全自动）
@@ -99,6 +100,7 @@ aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 然后访问 `http://127.0.0.1:8765`。
 在 `Skill Optimization Discovery` 区域可对现有 skill 立即执行优化。
 在 `New Skill Recommendations` 区域可一键创建并优化新增 skill。
+新增或优化后的 skill 文件默认写入项目根目录 `skills/`。
 
 3. 如需原始命令输出（可选）：
 

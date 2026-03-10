@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 workspace_dir="${AOSO_WORKSPACE_DIR:-$(pwd)}"
 
 usage() {
@@ -42,53 +43,55 @@ data_root="${AOSO_DATA_ROOT:-${workspace_dir}/.agent-loop-data}"
 metrics_file="${AOSO_DATA_FILE:-${data_root}/metrics/task-runs.csv}"
 kb_dir="${AOSO_KB_DIR:-${data_root}/knowledge-base/errors}"
 report_dir="${AOSO_REPORT_DIR:-${data_root}/reports}"
-skills_dir="${data_root}/skills"
 templates_dir="${data_root}/templates"
 error_template="${templates_dir}/error-entry.md"
+template_root="${SCRIPT_DIR}/../templates/workspace"
+template_metrics="${template_root}/metrics/task-runs.csv"
+template_error="${template_root}/templates/error-entry.md"
 
-mkdir -p "$(dirname "${metrics_file}")" "${kb_dir}" "${report_dir}" "${skills_dir}" "${templates_dir}"
+if [[ ! -d "${template_root}" ]]; then
+  echo "error: template root not found: ${template_root}"
+  exit 1
+fi
+
+if [[ ! -f "${template_metrics}" ]]; then
+  echo "error: missing template file: ${template_metrics}"
+  exit 1
+fi
+
+if [[ ! -f "${template_error}" ]]; then
+  echo "error: missing template file: ${template_error}"
+  exit 1
+fi
+
+mkdir -p "${data_root}"
+
+while IFS= read -r rel_dir; do
+  [[ -z "${rel_dir}" ]] && continue
+  mkdir -p "${data_root}/${rel_dir}"
+done < <(cd "${template_root}" && find . -type d | sed -E 's#^\./##')
+
+while IFS= read -r rel_file; do
+  [[ -z "${rel_file}" ]] && continue
+  if [[ "${rel_file}" == *.gitkeep ]]; then
+    continue
+  fi
+  src="${template_root}/${rel_file}"
+  dst="${data_root}/${rel_file}"
+  if [[ ! -f "${dst}" ]]; then
+    mkdir -p "$(dirname "${dst}")"
+    cp "${src}" "${dst}"
+  fi
+done < <(cd "${template_root}" && find . -type f | sed -E 's#^\./##')
+
+mkdir -p "$(dirname "${metrics_file}")" "${kb_dir}" "${report_dir}" "${templates_dir}"
 
 if [[ ! -f "${metrics_file}" ]]; then
-  echo "date,task_id,task_type,project,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count" > "${metrics_file}"
+  cp "${template_metrics}" "${metrics_file}"
 fi
 
 if [[ ! -f "${error_template}" ]]; then
-  cat > "${error_template}" <<'EOF'
----
-date: YYYY-MM-DD
-task_type: coding|debug|review|docs|ops
-severity: P0|P1|P2|P3
-status: open|closed
-root_cause: TODO
-prevention_rule: TODO
-trigger_signals: TODO
-token_cost_estimate: 0
----
-
-# Symptom
-
-Describe what failed and how it was observed.
-
-# Root Cause
-
-Single primary cause. Keep it specific and testable.
-
-# Fix Applied
-
-Describe the exact change that resolved the issue.
-
-# Prevention Rule
-
-Rule to add to AGENTS or a skill so this does not repeat.
-
-# Trigger Signals
-
-List early warning signs that should trigger the prevention rule.
-
-# Verification
-
-Tests/checks used to confirm the fix.
-EOF
+  cp "${template_error}" "${error_template}"
 fi
 
 echo "initialized self-optimization workspace:"
@@ -97,5 +100,5 @@ echo "  data_root: ${data_root}"
 echo "  metrics_file: ${metrics_file}"
 echo "  kb_dir: ${kb_dir}"
 echo "  report_dir: ${report_dir}"
-echo "  local_skills_dir: ${skills_dir}"
 echo "  error_template: ${error_template}"
+echo "  template_root: ${template_root}"
