@@ -1,6 +1,6 @@
 # Agent 自动自优化闭环（用户手册）
 
-<!-- README_SYNC_VERSION: 2026-03-09 -->
+<!-- README_SYNC_VERSION: 2026-03-10 -->
 
 这个项目用于在你的工程里落地“可量化”的 AI 编码自优化闭环。
 如果你的目标是“作为 skill 使用者快速上手”，请从这份 README 开始。
@@ -72,8 +72,7 @@ aoso-skill init --workspace "$(pwd)"
 1. 在 agent 工作流中，任务完成后应自动执行此命令（采集 + 分析 + 周报）：
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/auto_run_loop.sh" \
+aoso-skill run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -86,7 +85,7 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --rework-count 0
 ```
 
-如果未显式传入 telemetry，`auto_run_loop.sh` 会尝试从本地 Codex session 日志
+如果未显式传入 telemetry，`aoso-skill run` 会尝试从本地 Codex session 日志
 自动解析真实值（`$CODEX_HOME/sessions` 和 `$CODEX_HOME/archived_sessions`，有
 `CODEX_THREAD_ID` 时优先按线程匹配）。在非 Codex 运行器里，仍建议显式传入
 `total_tokens` / `duration_sec`（或设置 `CODEX_TOTAL_TOKENS`、`CODEX_TASK_DURATION_SEC`）。
@@ -104,10 +103,10 @@ aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 3. 如需原始命令输出（可选）：
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/metrics_report.sh" --all
-"${SKILL_HOME}/scripts/metrics_report.sh" --skill log-analysis-helper
-"${SKILL_HOME}/scripts/metrics_report.sh" --all --cutover YYYY-MM-DD
+aoso-skill metrics --workspace "$(pwd)" --all
+aoso-skill metrics --workspace "$(pwd)" --skill log-analysis-helper
+aoso-skill metrics --workspace "$(pwd)" --all --cutover YYYY-MM-DD
+aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
 ```
 
 4. 需要升级运行时 skill 时执行：
@@ -123,9 +122,9 @@ aoso-skill update
 这张图的阅读顺序：
 
 1. 优化发现时机：
-- 每次任务完成触发 `auto_run_loop.sh`，以及每次 dashboard 刷新 `/api/report` 时都会重新计算优化机会。
+- 每次任务完成触发 `aoso-skill run`，以及每次 dashboard 刷新 `/api/report` 时都会重新计算优化机会。
 2. 优化发现机制：
-- 基于 `metrics_report.sh`、weekly review、机会评分和新增 skill 推荐逻辑得出候选项。
+- 基于 `aoso-skill metrics`、weekly review、机会评分和新增 skill 推荐逻辑得出候选项。
 3. 数据记录保存位置：
 - 运行记录：`.agent-loop-data/metrics/task-runs.csv`
 - 失败知识库：`.agent-loop-data/knowledge-base/errors/*.md`

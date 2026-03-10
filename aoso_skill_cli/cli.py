@@ -75,7 +75,7 @@ def _agents_block() -> str:
         f"{BLOCK_START}\n"
         "## AOSO Skill Integration\n"
         "- Always load and use `agent-self-optimizing-loop` for project tasks.\n"
-        "- At task completion, run `auto_run_loop.sh` from installed skill home.\n"
+        "- At task completion, run `aoso-skill run ...`.\n"
         "- Use `aoso-skill dashboard` to open the local dashboard.\n"
         f"{BLOCK_END}\n"
     )
@@ -151,6 +151,54 @@ def _cmd_dashboard(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_run(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace).expanduser().resolve()
+    skill_home = _ensure_skill_installed(
+        repo=args.repo,
+        skill_path=args.skill_path,
+        auto_install=not args.no_auto_update,
+    )
+    auto_run_script = skill_home / "scripts" / "auto_run_loop.sh"
+    if not auto_run_script.is_file():
+        raise CliError(f"missing auto-run script: {auto_run_script}")
+    env = {"AOSO_WORKSPACE_DIR": str(workspace)}
+    _run([str(auto_run_script), *args.forward_args], env=env)
+    return 0
+
+
+def _cmd_metrics(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace).expanduser().resolve()
+    skill_home = _ensure_skill_installed(
+        repo=args.repo,
+        skill_path=args.skill_path,
+        auto_install=not args.no_auto_update,
+    )
+    metrics_script = skill_home / "scripts" / "metrics_report.sh"
+    if not metrics_script.is_file():
+        raise CliError(f"missing metrics script: {metrics_script}")
+    env = {"AOSO_WORKSPACE_DIR": str(workspace)}
+    forward_args = list(args.forward_args)
+    if not forward_args:
+        forward_args = ["--all"]
+    _run([str(metrics_script), *forward_args], env=env)
+    return 0
+
+
+def _cmd_optimize(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace).expanduser().resolve()
+    skill_home = _ensure_skill_installed(
+        repo=args.repo,
+        skill_path=args.skill_path,
+        auto_install=not args.no_auto_update,
+    )
+    optimize_script = skill_home / "scripts" / "optimize_skill.sh"
+    if not optimize_script.is_file():
+        raise CliError(f"missing optimize script: {optimize_script}")
+    env = {"AOSO_WORKSPACE_DIR": str(workspace)}
+    _run([str(optimize_script), *args.forward_args], env=env)
+    return 0
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="aoso-skill",
@@ -180,8 +228,29 @@ def _build_parser() -> argparse.ArgumentParser:
     dashboard_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
     dashboard_parser.set_defaults(func=_cmd_dashboard)
 
+    run_parser = subparsers.add_parser("run", help="run auto loop collection+analysis command")
+    run_parser.add_argument("--workspace", default=".", help="project workspace (default: current directory)")
+    run_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `aoso-skill update`")
+    run_parser.add_argument("--repo", default=DEFAULT_REPO, help=argparse.SUPPRESS)
+    run_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
+    run_parser.set_defaults(func=_cmd_run)
+
+    metrics_parser = subparsers.add_parser("metrics", help="run metrics report command")
+    metrics_parser.add_argument("--workspace", default=".", help="project workspace (default: current directory)")
+    metrics_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `aoso-skill update`")
+    metrics_parser.add_argument("--repo", default=DEFAULT_REPO, help=argparse.SUPPRESS)
+    metrics_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
+    metrics_parser.set_defaults(func=_cmd_metrics)
+
+    optimize_parser = subparsers.add_parser("optimize", help="run optimize skill command")
+    optimize_parser.add_argument("--workspace", default=".", help="project workspace (default: current directory)")
+    optimize_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `aoso-skill update`")
+    optimize_parser.add_argument("--repo", default=DEFAULT_REPO, help=argparse.SUPPRESS)
+    optimize_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
+    optimize_parser.set_defaults(func=_cmd_optimize)
+
     help_parser = subparsers.add_parser("help", help="show help")
-    help_parser.add_argument("topic", nargs="?", choices=["init", "update", "dashboard", "help"])
+    help_parser.add_argument("topic", nargs="?", choices=["init", "update", "dashboard", "run", "metrics", "optimize", "help"])
     help_parser.set_defaults(func=None)
 
     return parser
@@ -189,7 +258,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[list[str]] = None) -> int:
     parser = _build_parser()
-    args = parser.parse_args(argv)
+    args, unknown = parser.parse_known_args(argv)
+
+    forward_commands = {"run", "metrics", "optimize"}
+    if args.command in forward_commands:
+        args.forward_args = unknown
+    elif unknown:
+        parser.error(f"unknown arguments: {' '.join(unknown)}")
 
     if args.command is None:
         parser.print_help()

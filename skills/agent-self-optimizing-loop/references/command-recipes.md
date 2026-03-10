@@ -6,21 +6,22 @@
 aoso-skill update
 aoso-skill init --workspace "$(pwd)"
 aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
+aoso-skill run --workspace "$(pwd)" --task-id TASK-1001 --task-type debug --project my-service --model gpt-5 --used-skill true --skill-name log-analysis-helper --success true
+aoso-skill metrics --workspace "$(pwd)" --all
+aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
 aoso-skill help
 ```
 
 ## 1) Initialize project data folder
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/setup_loop_workspace.sh" --workspace "$(pwd)"
+aoso-skill init --workspace "$(pwd)"
 ```
 
 ## 2) Auto-run one full loop
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/auto_run_loop.sh" \
+aoso-skill run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -35,10 +36,9 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 ## 2b) Auto-run with telemetry from runtime env
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 CODEX_TOTAL_TOKENS=1820 \
 CODEX_TASK_DURATION_SEC=420 \
-"${SKILL_HOME}/scripts/auto_run_loop.sh" \
+aoso-skill run --workspace "$(pwd)" \
   --task-id TASK-1002 \
   --task-type debug \
   --project my-service \
@@ -49,14 +49,13 @@ CODEX_TASK_DURATION_SEC=420 \
   --enforce-telemetry
 ```
 
-If explicit telemetry is omitted, `auto_run_loop.sh` will try to resolve values from local
+If explicit telemetry is omitted, `aoso-skill run` will try to resolve values from local
 Codex session logs (`$CODEX_HOME/sessions` and `$CODEX_HOME/archived_sessions`).
 
 ## 3) Log one task run (direct)
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/log_task_run.sh" \
+aoso-skill run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -65,40 +64,35 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --skill-name log-analysis-helper \
   --total-tokens 1820 \
   --duration-sec 420 \
-  --success true
+  --success true \
+  --skip-weekly
 ```
 
 ## 4) Measure skill effect
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/metrics_report.sh" --skill log-analysis-helper
+aoso-skill metrics --workspace "$(pwd)" --skill log-analysis-helper
 ```
 
 ## 5) Measure engineering pre/post effect
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/metrics_report.sh" --all --cutover 2026-03-01
+aoso-skill metrics --workspace "$(pwd)" --all --cutover 2026-03-01
 ```
 
 ## 6) Generate weekly review
 
-```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/weekly_review.sh"
-```
+Weekly review is included in `aoso-skill run` by default.
+If you only want task logging + metrics without weekly review, add `--skip-weekly`.
 
 ## 7) Open the local dashboard
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/dashboard_server.sh" --host 127.0.0.1 --port 8765
+aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 ```
 
 ## 8) Trigger optimization plan for one skill
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/optimize_skill.sh" --skill log-analysis-helper
+aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
 ```

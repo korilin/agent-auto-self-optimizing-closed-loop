@@ -9,21 +9,21 @@ Use this skill to operationalize and measure continuous optimization in any proj
 
 ## Required Paths
 
-- Resolve the skill home as: `${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop`
+- Prefer CLI entrypoint (`aoso-skill`) so users do not need to resolve install paths manually.
 - Use project-local data under `.agent-loop-data/`
-- Optional CLI entrypoint for users: `aoso-skill` (`init`, `update`, `dashboard`, `help`).
+- CLI entrypoint: `aoso-skill` (`init`, `update`, `dashboard`, `run`, `metrics`, `optimize`, `help`).
 
 ## Automation Behavior
 
 - Do not ask the user to run logging/report commands manually when this skill is active.
-- At task completion, run `scripts/auto_run_loop.sh` automatically with task metadata.
-- Use `scripts/dashboard_server.sh` for interactive filtering instead of manual output parsing.
+- At task completion, run `aoso-skill run ...` automatically with task metadata.
+- Use `aoso-skill dashboard` for interactive filtering instead of manual output parsing.
 - Use dashboard optimization discovery and run optimize/create actions immediately from the page.
 
 ## Mandatory Guarantees
 
 - `agent-self-optimizing-loop` must persist one task record for every completed task.
-- A task should not be reported complete before `scripts/auto_run_loop.sh` succeeds.
+- A task should not be reported complete before `aoso-skill run ...` succeeds.
 - Prefer real telemetry values for `total_tokens` and `duration_sec`.
 - If runtime telemetry is unavailable, explicitly mark this as telemetry gap and fix the integration.
 
@@ -31,14 +31,12 @@ Use this skill to operationalize and measure continuous optimization in any proj
 
 1. Initialize project data once:
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/setup_loop_workspace.sh" --workspace "$(pwd)"
+aoso-skill init --workspace "$(pwd)"
 ```
 
 2. Run automation at task completion (collection + analysis + review):
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/auto_run_loop.sh" \
+aoso-skill run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -55,8 +53,7 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
 
 4. Open the web dashboard for filtering and visualization:
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/dashboard_server.sh" --host 127.0.0.1 --port 8765
+aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 ```
 
 Use `Skill Optimization Discovery` in the dashboard to optimize existing skills immediately.
@@ -64,11 +61,10 @@ Use `New Skill Recommendations` to create-and-optimize candidate new skills imme
 
 5. Optional direct commands (if you need script-level outputs):
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/metrics_report.sh" --all
-"${SKILL_HOME}/scripts/metrics_report.sh" --skill log-analysis-helper
-"${SKILL_HOME}/scripts/metrics_report.sh" --all --cutover 2026-03-01
-"${SKILL_HOME}/scripts/optimize_skill.sh" --skill log-analysis-helper
+aoso-skill metrics --workspace "$(pwd)" --all
+aoso-skill metrics --workspace "$(pwd)" --skill log-analysis-helper
+aoso-skill metrics --workspace "$(pwd)" --all --cutover 2026-03-01
+aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
 ```
 
 ## Interpretation Rules

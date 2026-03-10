@@ -58,11 +58,10 @@ aoso-skill init --workspace "$(pwd)"
 aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 ```
 
-任务完成自动记录建议使用运行时脚本（由 agent 自动执行）：
+任务完成自动记录建议使用 CLI 命令（由 agent 自动执行）：
 
 ```bash
-SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
-"${SKILL_HOME}/scripts/auto_run_loop.sh" \
+aoso-skill run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -74,12 +73,12 @@ SKILL_HOME="${CODEX_HOME:-$HOME/.codex}/skills/agent-self-optimizing-loop"
   --success true
 ```
 
-补充：如果未显式传 `--total-tokens/--duration-sec`，`auto_run_loop.sh` 会从本地 Codex session 日志自动回填（`$CODEX_HOME/sessions` 与 `$CODEX_HOME/archived_sessions`，有 `CODEX_THREAD_ID` 时按线程匹配）。
+补充：如果未显式传 `--total-tokens/--duration-sec`，`aoso-skill run` 会从本地 Codex session 日志自动回填（`$CODEX_HOME/sessions` 与 `$CODEX_HOME/archived_sessions`，有 `CODEX_THREAD_ID` 时按线程匹配）。
 
 ## 在目标工程如何真正生效
 
 1. `AGENTS.md` 中声明：任务执行需使用 `agent-self-optimizing-loop`。
-2. 每个任务结束自动执行 `auto_run_loop.sh`。
+2. 每个任务结束自动执行 `aoso-skill run ...`。
 3. 每个失败事件写一条 error entry（脚本自动分析会读取这些条目）。
 4. 用 dashboard 做日期/skill/指标筛选，并触发优化与新增 skill。
 5. 把确认有效的规则与优化结果回写到 `AGENTS.md` 或 skill。
