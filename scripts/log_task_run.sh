@@ -2,10 +2,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-WORKSPACE_DIR="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+WORKSPACE_DIR="${OPTSMITH_WORKSPACE_DIR:-$(pwd)}"
 WORKSPACE_DIR="$(cd "${WORKSPACE_DIR}" && pwd)"
 DATA_FILE_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/metrics/task-runs.csv"
-DATA_FILE="${AOSO_DATA_FILE:-${DATA_FILE_DEFAULT}}"
+DATA_FILE="${OPTSMITH_DATA_FILE:-${DATA_FILE_DEFAULT}}"
 
 date_val="$(date +%Y-%m-%d)"
 task_id=""
@@ -22,7 +22,7 @@ rework_count="0"
 usage() {
   cat <<'EOF'
 Usage:
-  AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv ./scripts/log_task_run.sh ...
+  OPTSMITH_DATA_FILE=.agent-loop-data/metrics/task-runs.csv ./scripts/log_task_run.sh ...
 
   ./scripts/log_task_run.sh \
     --task-id TASK-1001 \

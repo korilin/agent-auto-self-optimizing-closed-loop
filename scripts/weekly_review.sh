@@ -2,12 +2,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-WORKSPACE_DIR="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+WORKSPACE_DIR="${OPTSMITH_WORKSPACE_DIR:-$(pwd)}"
 WORKSPACE_DIR="$(cd "${WORKSPACE_DIR}" && pwd)"
 KB_DIR_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/knowledge-base/errors"
 REPORT_DIR_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/reports"
-KB_DIR="${AOSO_KB_DIR:-${KB_DIR_DEFAULT}}"
-REPORT_DIR="${AOSO_REPORT_DIR:-${REPORT_DIR_DEFAULT}}"
+KB_DIR="${OPTSMITH_KB_DIR:-${KB_DIR_DEFAULT}}"
+REPORT_DIR="${OPTSMITH_REPORT_DIR:-${REPORT_DIR_DEFAULT}}"
 
 today="$(date +%Y-%m-%d)"
 start_date="$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)"

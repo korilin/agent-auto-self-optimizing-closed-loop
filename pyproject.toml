@@ -3,14 +3,14 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aoso-skill"
+name = "optsmith"
 version = "0.1.2"
-description = "CLI for initializing and operating the agent-self-optimizing-loop skill in projects."
+description = "CLI for initializing and operating the agent-optsmith-loop skill in projects."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
 authors = [
-  { name = "AOSO Maintainers" }
+  { name = "Optsmith Maintainers" }
 ]
 keywords = ["codex", "skill", "self-optimization", "dashboard"]
 classifiers = [
@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 [project.scripts]
-aoso-skill = "aoso_skill_cli.cli:main"
+optsmith = "optsmith_cli.cli:main"
 
 [tool.setuptools]
-packages = ["aoso_skill_cli"]
+packages = ["optsmith_cli"]

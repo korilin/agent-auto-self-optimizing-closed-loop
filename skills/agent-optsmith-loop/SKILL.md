@@ -1,5 +1,5 @@
 ---
-name: agent-self-optimizing-loop
+name: agent-optsmith-loop
 description: Set up and run a project-level self-optimizing loop for AI coding workflows with measurable impact. Use when users ask to introduce self-optimization in a repository, log per-task token and duration metrics, generate weekly error reviews, evaluate how much a skill reduced token usage, or compare engineering productivity before and after optimization changes.
 ---
 
@@ -9,21 +9,21 @@ Use this skill to operationalize and measure continuous optimization in any proj
 
 ## Required Paths
 
-- Prefer CLI entrypoint (`aoso-skill`) so users do not need to resolve install paths manually.
+- Prefer CLI entrypoint (`optsmith`) so users do not need to resolve install paths manually.
 - Use project-local data under `.agent-loop-data/`
-- CLI entrypoint: `aoso-skill` (`init`, `update`, `dashboard`, `run`, `metrics`, `optimize`, `help`).
+- CLI entrypoint: `optsmith` (`init`, `update`, `dashboard`, `run`, `metrics`, `optimize`, `help`).
 
 ## Automation Behavior
 
 - Do not ask the user to run logging/report commands manually when this skill is active.
-- At task completion, run `aoso-skill run ...` automatically with task metadata.
-- Use `aoso-skill dashboard` for interactive filtering instead of manual output parsing.
+- At task completion, run `optsmith run ...` automatically with task metadata.
+- Use `optsmith dashboard` for interactive filtering instead of manual output parsing.
 - Use dashboard optimization discovery and run optimize/create actions immediately from the page.
 
 ## Mandatory Guarantees
 
-- `agent-self-optimizing-loop` must persist one task record for every completed task.
-- A task should not be reported complete before `aoso-skill run ...` succeeds.
+- `agent-optsmith-loop` must persist one task record for every completed task.
+- A task should not be reported complete before `optsmith run ...` succeeds.
 - Prefer real telemetry values for `total_tokens` and `duration_sec`.
 - If runtime telemetry is unavailable, explicitly mark this as telemetry gap and fix the integration.
 
@@ -31,12 +31,12 @@ Use this skill to operationalize and measure continuous optimization in any proj
 
 1. Initialize project data once:
 ```bash
-aoso-skill init --workspace "$(pwd)"
+optsmith init --workspace "$(pwd)"
 ```
 
 2. Run automation at task completion (collection + analysis + review):
 ```bash
-aoso-skill run --workspace "$(pwd)" \
+optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -53,7 +53,7 @@ aoso-skill run --workspace "$(pwd)" \
 
 4. Open the web dashboard for filtering and visualization:
 ```bash
-aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
+optsmith dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 ```
 
 Use `Skill Optimization Discovery` in the dashboard to optimize existing skills immediately.
@@ -62,10 +62,10 @@ New or optimized skill files are written under project `.agents/skills/`.
 
 5. Optional direct commands (if you need script-level outputs):
 ```bash
-aoso-skill metrics --workspace "$(pwd)" --all
-aoso-skill metrics --workspace "$(pwd)" --skill log-analysis-helper
-aoso-skill metrics --workspace "$(pwd)" --all --cutover 2026-03-01
-aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
+optsmith metrics --workspace "$(pwd)" --all
+optsmith metrics --workspace "$(pwd)" --skill log-analysis-helper
+optsmith metrics --workspace "$(pwd)" --all --cutover 2026-03-01
+optsmith optimize --workspace "$(pwd)" --skill log-analysis-helper
 ```
 
 ## Interpretation Rules

@@ -1,4 +1,4 @@
-# Agent Auto Self-Optimizing Closed Loop (User Guide)
+# Agent Optsmith (User Guide)
 
 <!-- README_SYNC_VERSION: 2026-03-10 -->
 
@@ -31,24 +31,24 @@ In your project, data is stored under `.agent-loop-data/`:
 - `reports/`
 - `templates/error-entry.md`
 
-## 2. Install `aoso-skill` CLI (No Submodule)
+## 2. Install `optsmith` CLI (No Submodule)
 
 Use either Homebrew or pipx:
 
 ```bash
-brew tap korilin/aoso-skill https://github.com/korilin/agent-auto-self-optimizing-closed-loop
-brew install aoso-skill
+brew tap korilin/optsmith https://github.com/korilin/agent-optsmith
+brew install optsmith
 ```
 
 ```bash
-pipx install "git+https://github.com/korilin/agent-auto-self-optimizing-closed-loop.git"
+pipx install "git+https://github.com/korilin/agent-optsmith.git"
 ```
 
 Then install or update runtime skill assets:
 
 ```bash
-aoso-skill update
-aoso-skill help
+optsmith update
+optsmith help
 ```
 
 ## 3. Initialize Your Project Once
@@ -56,7 +56,7 @@ aoso-skill help
 Run this in the target project root:
 
 ```bash
-aoso-skill init --workspace "$(pwd)"
+optsmith init --workspace "$(pwd)"
 ```
 
 Expected result:
@@ -66,14 +66,14 @@ Expected result:
 - `.agent-loop-data/reports/` created.
 - `.agent-loop-data/templates/error-entry.md` created.
 - `.agent-loop-data/skills` is not created by `init`.
-- `AGENTS.md` gets/refreshes a managed `AOSO-SKILL` block.
+- `AGENTS.md` gets/refreshes a managed `OPTSMITH-SKILL` block.
 
 ## 4. Daily Workflow (Fully Automated Path)
 
 1. In agent workflow, this command should be auto-executed at task completion (collect + analyze + review):
 
 ```bash
-aoso-skill run --workspace "$(pwd)" \
+optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -86,7 +86,7 @@ aoso-skill run --workspace "$(pwd)" \
   --rework-count 0
 ```
 
-If telemetry is not passed explicitly, `aoso-skill run` will try to resolve real values from
+If telemetry is not passed explicitly, `optsmith run` will try to resolve real values from
 local Codex session logs (`$CODEX_HOME/sessions` and `$CODEX_HOME/archived_sessions`, using
 `CODEX_THREAD_ID` when available). For non-Codex runners, keep passing `total_tokens` /
 `duration_sec` (or set env vars such as `CODEX_TOTAL_TOKENS` and `CODEX_TASK_DURATION_SEC`).
@@ -94,7 +94,7 @@ local Codex session logs (`$CODEX_HOME/sessions` and `$CODEX_HOME/archived_sessi
 2. Open dashboard for filtering, optimization discovery, and direct optimization:
 
 ```bash
-aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
+optsmith dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 ```
 
 Then open `http://127.0.0.1:8765`.
@@ -103,33 +103,33 @@ Use `New Skill Recommendations` to create-and-optimize a new skill immediately.
 New or optimized skill files are written under project `.agents/skills/` by default
 (Codex auto-readable project skill directory).
 Legacy fallback scan for project `skills/` is disabled. If you need a custom path,
-set `AOSO_LOCAL_SKILLS_DIR`.
+set `OPTSMITH_LOCAL_SKILLS_DIR`.
 
 3. Optional direct report commands (if you need raw CLI output):
 
 ```bash
-aoso-skill metrics --workspace "$(pwd)" --all
-aoso-skill metrics --workspace "$(pwd)" --skill log-analysis-helper
-aoso-skill metrics --workspace "$(pwd)" --all --cutover YYYY-MM-DD
-aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
+optsmith metrics --workspace "$(pwd)" --all
+optsmith metrics --workspace "$(pwd)" --skill log-analysis-helper
+optsmith metrics --workspace "$(pwd)" --all --cutover YYYY-MM-DD
+optsmith optimize --workspace "$(pwd)" --skill log-analysis-helper
 ```
 
 4. Upgrade runtime skill when needed:
 
 ```bash
-aoso-skill update
+optsmith update
 ```
 
 ### Complete Closed-Loop Flow
 
-![AOSO closed-loop flow](docs/assets/self-optimization-closed-loop-flow.png)
+![Optsmith closed-loop flow](docs/assets/self-optimization-closed-loop-flow.png)
 
 How to read this flow:
 
 1. Discovery timing:
-- On every completed task (`aoso-skill run`) and every dashboard refresh (`/api/report`), opportunities are recalculated from latest local data.
+- On every completed task (`optsmith run`) and every dashboard refresh (`/api/report`), opportunities are recalculated from latest local data.
 2. Discovery mechanism:
-- `aoso-skill metrics` + weekly review + opportunity scoring + new-skill recommendation logic drive optimization candidates.
+- `optsmith metrics` + weekly review + opportunity scoring + new-skill recommendation logic drive optimization candidates.
 3. Where records are saved:
 - Run data: `.agent-loop-data/metrics/task-runs.csv`
 - Error KB: `.agent-loop-data/knowledge-base/errors/*.md`

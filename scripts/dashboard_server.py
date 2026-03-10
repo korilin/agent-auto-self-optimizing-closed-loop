@@ -30,7 +30,7 @@ HTML_PAGE = """<!doctype html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AOSO Dashboard</title>
+  <title>Optsmith Dashboard</title>
   <style>
     :root {
       --bg: #f8f6f2;
@@ -568,7 +568,7 @@ HTML_PAGE = """<!doctype html>
       },
     };
 
-    let currentLang = localStorage.getItem("aoso_dashboard_lang") || "en";
+    let currentLang = localStorage.getItem("optsmith_dashboard_lang") || "en";
     if (!I18N[currentLang]) currentLang = "en";
     let lastReport = null;
     const optimizedExistingSkills = new Set();
@@ -1074,7 +1074,7 @@ HTML_PAGE = """<!doctype html>
     nodes.refreshBtn.addEventListener("click", refreshDashboard);
     nodes.languageSelect.addEventListener("change", () => {
       currentLang = nodes.languageSelect.value === "zh" ? "zh" : "en";
-      localStorage.setItem("aoso_dashboard_lang", currentLang);
+      localStorage.setItem("optsmith_dashboard_lang", currentLang);
       applyLanguage();
       if (lastReport) {
         renderOptions({
@@ -1220,7 +1220,7 @@ class RuntimePaths:
 def resolve_runtime_paths() -> RuntimePaths:
     script_dir = Path(__file__).resolve().parent
     skill_mode = (script_dir.parent / "SKILL.md").is_file()
-    workspace = Path(os.environ.get("AOSO_WORKSPACE_DIR", os.getcwd())).resolve()
+    workspace = Path(os.environ.get("OPTSMITH_WORKSPACE_DIR", os.getcwd())).resolve()
 
     if skill_mode:
         data_file_default = workspace / ".agent-loop-data/metrics/task-runs.csv"
@@ -1233,15 +1233,15 @@ def resolve_runtime_paths() -> RuntimePaths:
         report_dir_default = workspace / ".agent-loop-data/reports"
         local_skills_dir_default = workspace / ".agents/skills"
 
-    data_file = Path(os.environ.get("AOSO_DATA_FILE", str(data_file_default))).resolve()
-    kb_dir = Path(os.environ.get("AOSO_KB_DIR", str(kb_dir_default))).resolve()
-    report_dir = Path(os.environ.get("AOSO_REPORT_DIR", str(report_dir_default))).resolve()
+    data_file = Path(os.environ.get("OPTSMITH_DATA_FILE", str(data_file_default))).resolve()
+    kb_dir = Path(os.environ.get("OPTSMITH_KB_DIR", str(kb_dir_default))).resolve()
+    report_dir = Path(os.environ.get("OPTSMITH_REPORT_DIR", str(report_dir_default))).resolve()
     local_skills_dir = Path(
-        os.environ.get("AOSO_LOCAL_SKILLS_DIR", str(local_skills_dir_default))
+        os.environ.get("OPTSMITH_LOCAL_SKILLS_DIR", str(local_skills_dir_default))
     ).resolve()
     optimization_state_file = Path(
         os.environ.get(
-            "AOSO_DASHBOARD_STATE_FILE",
+            "OPTSMITH_DASHBOARD_STATE_FILE",
             str(report_dir / "dashboard-optimization-state.json"),
         )
     ).resolve()
@@ -1860,7 +1860,7 @@ def discover_skill_opportunities(
         cmd = [str(paths.metrics_script), "--skill", skill]
         if cutover:
             cmd.extend(["--cutover", cutover])
-        raw_output = run_script(cmd, {"AOSO_DATA_FILE": str(filtered_data_file)})
+        raw_output = run_script(cmd, {"OPTSMITH_DATA_FILE": str(filtered_data_file)})
         sections = parse_metrics_output(raw_output)
         metrics = _find_skill_metrics(sections, skill)
         skill_rows = [
@@ -1891,7 +1891,7 @@ def run_weekly_review(
     if not paths.kb_dir.exists():
         return "knowledge-base/errors directory not found."
 
-    with tempfile.TemporaryDirectory(prefix="aoso-dashboard-weekly-") as tmp_dir:
+    with tempfile.TemporaryDirectory(prefix="optsmith-dashboard-weekly-") as tmp_dir:
         tmp_root = Path(tmp_dir)
         tmp_kb = tmp_root / "kb"
         tmp_report = tmp_root / "reports"
@@ -1919,8 +1919,8 @@ def run_weekly_review(
         output = run_script(
             [str(paths.weekly_script)],
             {
-                "AOSO_KB_DIR": str(tmp_kb),
-                "AOSO_REPORT_DIR": str(tmp_report),
+                "OPTSMITH_KB_DIR": str(tmp_kb),
+                "OPTSMITH_REPORT_DIR": str(tmp_report),
             },
         )
 
@@ -1937,8 +1937,8 @@ def run_weekly_review(
         return path.read_text(encoding="utf-8")
 
 
-AUTO_OPT_START = "<!-- AOSO_AUTO_OPT_START -->"
-AUTO_OPT_END = "<!-- AOSO_AUTO_OPT_END -->"
+AUTO_OPT_START = "<!-- OPTSMITH_AUTO_OPT_START -->"
+AUTO_OPT_END = "<!-- OPTSMITH_AUTO_OPT_END -->"
 
 
 def _ensure_str_list(value: object) -> List[str]:
@@ -2275,7 +2275,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
         filtered_rows = filter_rows(rows, start, end)
 
-        with tempfile.TemporaryDirectory(prefix="aoso-dashboard-") as tmp_dir:
+        with tempfile.TemporaryDirectory(prefix="optsmith-dashboard-") as tmp_dir:
             tmp_csv = Path(tmp_dir) / "filtered.csv"
             write_filtered_csv(fieldnames, filtered_rows, tmp_csv)
             kb_entries = load_kb_entries(self.runtime_paths.kb_dir, start, end)
@@ -2283,7 +2283,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             metrics_cmd: List[str] = [str(self.runtime_paths.metrics_script), "--all"]
             if cutover:
                 metrics_cmd.extend(["--cutover", cutover])
-            overall_raw = run_script(metrics_cmd, {"AOSO_DATA_FILE": str(tmp_csv)})
+            overall_raw = run_script(metrics_cmd, {"OPTSMITH_DATA_FILE": str(tmp_csv)})
 
             skill_raw = ""
             if skill:
@@ -2294,7 +2294,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 ]
                 if cutover:
                     skill_cmd.extend(["--cutover", cutover])
-                skill_raw = run_script(skill_cmd, {"AOSO_DATA_FILE": str(tmp_csv)})
+                skill_raw = run_script(skill_cmd, {"OPTSMITH_DATA_FILE": str(tmp_csv)})
 
             weekly_raw = run_weekly_review(self.runtime_paths, start, end)
             opportunities = discover_skill_opportunities(
@@ -2343,7 +2343,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
 
         filtered_rows = filter_rows(rows, start, end)
-        with tempfile.TemporaryDirectory(prefix="aoso-dashboard-op-") as tmp_dir:
+        with tempfile.TemporaryDirectory(prefix="optsmith-dashboard-op-") as tmp_dir:
             tmp_csv = Path(tmp_dir) / "filtered.csv"
             write_filtered_csv(fieldnames, filtered_rows, tmp_csv)
             opportunities = discover_skill_opportunities(

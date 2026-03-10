@@ -2,11 +2,11 @@
 
 ## 2026-03-09T16:45:59
 - mode: existing
-- skill: aoso-repo-maintainer
+- skill: optsmith-repo-maintainer
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-optsmith/.agent-loop-data/reports/skill-optimization/2026-03-09-optsmith-repo-maintainer-optimization-plan.md
 
 ### Findings
 - Insufficient baseline on matching task types.
@@ -19,11 +19,11 @@
 
 ## 2026-03-09T16:59:53
 - mode: existing
-- skill: aoso-repo-maintainer
+- skill: optsmith-repo-maintainer
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-optsmith/.agent-loop-data/reports/skill-optimization/2026-03-09-optsmith-repo-maintainer-optimization-plan.md
 
 ### Findings
 - Insufficient baseline on matching task types.
@@ -36,11 +36,11 @@
 
 ## 2026-03-09T17:17:21
 - mode: existing
-- skill: aoso-repo-maintainer
+- skill: optsmith-repo-maintainer
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-optsmith/.agent-loop-data/reports/skill-optimization/2026-03-09-optsmith-repo-maintainer-optimization-plan.md
 
 ### Findings
 - Insufficient baseline on matching task types.
@@ -53,11 +53,11 @@
 
 ## 2026-03-09T17:42:49
 - mode: existing
-- skill: aoso-repo-maintainer
+- skill: optsmith-repo-maintainer
 - task_type: n/a
 - optimization_status: watch
 - opportunity_score: 50
-- source_report: /Users/korilin/Documents/github/agent-auto-self-optimizing-closed-loop/.agent-loop-data/reports/skill-optimization/2026-03-09-aoso-repo-maintainer-optimization-plan.md
+- source_report: /Users/korilin/Documents/github/agent-optsmith/.agent-loop-data/reports/skill-optimization/2026-03-09-optsmith-repo-maintainer-optimization-plan.md
 
 ### Findings
 - Insufficient baseline on matching task types.

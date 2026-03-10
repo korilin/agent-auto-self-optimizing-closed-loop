@@ -46,23 +46,23 @@ Skill quality gates:
 
 ## Project-Local Skill
 
-Use project-local skill `aoso-repo-maintainer` for repository maintenance tasks:
+Use project-local skill `optsmith-repo-maintainer` for repository maintenance tasks:
 
-- path: `.agents/skills/aoso-repo-maintainer/`
+- path: `.agents/skills/optsmith-repo-maintainer/`
 - trigger: any change to `scripts/`, `.agents/skills/`, `skills/`, CI, or workflow docs.
 - local/public split:
-  - project-local maintainer skill: `.agents/skills/aoso-repo-maintainer/`
-  - installable public skill: `skills/agent-self-optimizing-loop/`
+  - project-local maintainer skill: `.agents/skills/optsmith-repo-maintainer/`
+  - installable public skill: `skills/agent-optsmith-loop/`
 - required workflow:
-  1. `.agents/skills/aoso-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh` (when runtime scripts changed)
+  1. `.agents/skills/optsmith-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh` (when runtime scripts changed)
   2. Update docs when command behavior changed.
-  3. `.agents/skills/aoso-repo-maintainer/scripts/check_readme_sync.sh` (README.md and README_CN.md must stay synchronized)
-  4. `.agents/skills/aoso-repo-maintainer/scripts/validate_repo_workflow.sh`
-  5. `.agents/skills/aoso-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"`
+  3. `.agents/skills/optsmith-repo-maintainer/scripts/check_readme_sync.sh` (README.md and README_CN.md must stay synchronized)
+  4. `.agents/skills/optsmith-repo-maintainer/scripts/validate_repo_workflow.sh`
+  5. `.agents/skills/optsmith-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"`
 
 ## Automation Policy
 
-- Prefer `scripts/auto_run_loop.sh` / `skills/agent-self-optimizing-loop/scripts/auto_run_loop.sh` over manual multi-command operation.
+- Prefer `scripts/auto_run_loop.sh` / `skills/agent-optsmith-loop/scripts/auto_run_loop.sh` over manual multi-command operation.
 - Prefer dashboard filtering via `scripts/dashboard_server.sh` for interactive metric analysis.
 - Use `scripts/optimize_skill.sh` (or dashboard trigger) to generate explicit optimization plans per skill.
 
@@ -107,9 +107,9 @@ Run `./scripts/weekly_review.sh` once per week and review:
 - New failures are captured in error KB.
 - Follow-up rule/skill updates are clearly identified.
 
-<!-- AOSO-SKILL:START -->
-## AOSO Skill Integration
-- Always load and use `agent-self-optimizing-loop` for project tasks.
-- At task completion, run `aoso-skill run ...`.
-- Use `aoso-skill dashboard` to open the local dashboard.
-<!-- AOSO-SKILL:END -->
+<!-- OPTSMITH-SKILL:START -->
+## Optsmith Skill Integration
+- Always load and use `agent-optsmith-loop` for project tasks.
+- At task completion, run `optsmith run ...`.
+- Use `optsmith dashboard` to open the local dashboard.
+<!-- OPTSMITH-SKILL:END -->

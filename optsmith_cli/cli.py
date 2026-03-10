@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI entrypoint for operating the agent-self-optimizing-loop skill."""
+"""CLI entrypoint for operating the agent-optsmith-loop skill."""
 
 from __future__ import annotations
 
@@ -11,10 +11,10 @@ from pathlib import Path
 from typing import Optional
 
 
-DEFAULT_REPO = "korilin/agent-auto-self-optimizing-closed-loop"
-DEFAULT_SKILL_PATH = "skills/agent-self-optimizing-loop"
-BLOCK_START = "<!-- AOSO-SKILL:START -->"
-BLOCK_END = "<!-- AOSO-SKILL:END -->"
+DEFAULT_REPO = "korilin/agent-optsmith"
+DEFAULT_SKILL_PATH = "skills/agent-optsmith-loop"
+BLOCK_START = "<!-- OPTSMITH-SKILL:START -->"
+BLOCK_END = "<!-- OPTSMITH-SKILL:END -->"
 
 
 class CliError(RuntimeError):
@@ -27,7 +27,7 @@ def _codex_home() -> Path:
 
 
 def _skill_home() -> Path:
-    return _codex_home() / "skills" / "agent-self-optimizing-loop"
+    return _codex_home() / "skills" / "agent-optsmith-loop"
 
 
 def _installer_script() -> Path:
@@ -71,23 +71,23 @@ def _ensure_skill_installed(repo: str, skill_path: str, auto_install: bool) -> P
     if skill_home.is_dir():
         return skill_home
     if auto_install:
-        print("info: agent-self-optimizing-loop not found locally, running update...", file=sys.stderr)
+        print("info: agent-optsmith-loop not found locally, running update...", file=sys.stderr)
         _install_skill(repo=repo, skill_path=skill_path)
         if skill_home.is_dir():
             return skill_home
     raise CliError(
         f"skill not found: {skill_home}\n"
-        "hint: run `aoso-skill update` first."
+        "hint: run `optsmith update` first."
     )
 
 
 def _agents_block() -> str:
     return (
         f"{BLOCK_START}\n"
-        "## AOSO Skill Integration\n"
-        "- Always load and use `agent-self-optimizing-loop` for project tasks.\n"
-        "- At task completion, run `aoso-skill run ...`.\n"
-        "- Use `aoso-skill dashboard` to open the local dashboard.\n"
+        "## Optsmith Skill Integration\n"
+        "- Always load and use `agent-optsmith-loop` for project tasks.\n"
+        "- At task completion, run `optsmith run ...`.\n"
+        "- Use `optsmith dashboard` to open the local dashboard.\n"
         f"{BLOCK_END}\n"
     )
 
@@ -135,7 +135,7 @@ def _cmd_init(args: argparse.Namespace) -> int:
         print(f"updated: {agents_file}")
 
     print(f"initialized workspace: {workspace}")
-    print("next: use `aoso-skill dashboard` to open the web dashboard")
+    print("next: use `optsmith dashboard` to open the web dashboard")
     return 0
 
 
@@ -148,7 +148,7 @@ def _cmd_dashboard(args: argparse.Namespace) -> int:
     )
 
     dashboard_script = skill_home / "scripts" / "dashboard_server.sh"
-    env = {"AOSO_WORKSPACE_DIR": str(workspace)}
+    env = {"OPTSMITH_WORKSPACE_DIR": str(workspace)}
     _run_shell_script(dashboard_script, ["--host", args.host, "--port", str(args.port)], env=env)
     return 0
 
@@ -161,7 +161,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
         auto_install=not args.no_auto_update,
     )
     auto_run_script = skill_home / "scripts" / "auto_run_loop.sh"
-    env = {"AOSO_WORKSPACE_DIR": str(workspace)}
+    env = {"OPTSMITH_WORKSPACE_DIR": str(workspace)}
     _run_shell_script(auto_run_script, args.forward_args, env=env)
     return 0
 
@@ -174,7 +174,7 @@ def _cmd_metrics(args: argparse.Namespace) -> int:
         auto_install=not args.no_auto_update,
     )
     metrics_script = skill_home / "scripts" / "metrics_report.sh"
-    env = {"AOSO_WORKSPACE_DIR": str(workspace)}
+    env = {"OPTSMITH_WORKSPACE_DIR": str(workspace)}
     forward_args = list(args.forward_args)
     if not forward_args:
         forward_args = ["--all"]
@@ -190,19 +190,19 @@ def _cmd_optimize(args: argparse.Namespace) -> int:
         auto_install=not args.no_auto_update,
     )
     optimize_script = skill_home / "scripts" / "optimize_skill.sh"
-    env = {"AOSO_WORKSPACE_DIR": str(workspace)}
+    env = {"OPTSMITH_WORKSPACE_DIR": str(workspace)}
     _run_shell_script(optimize_script, args.forward_args, env=env)
     return 0
 
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="aoso-skill",
-        description="Operate the agent-self-optimizing-loop skill without git submodule setup.",
+        prog="optsmith",
+        description="Operate the agent-optsmith-loop skill without git submodule setup.",
     )
     subparsers = parser.add_subparsers(dest="command")
 
-    update_parser = subparsers.add_parser("update", help="install or update agent-self-optimizing-loop skill")
+    update_parser = subparsers.add_parser("update", help="install or update agent-optsmith-loop skill")
     update_parser.add_argument("--repo", default=DEFAULT_REPO, help=f"github repo (default: {DEFAULT_REPO})")
     update_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=f"repo path (default: {DEFAULT_SKILL_PATH})")
     update_parser.set_defaults(func=_cmd_update)
@@ -210,7 +210,7 @@ def _build_parser() -> argparse.ArgumentParser:
     init_parser = subparsers.add_parser("init", help="initialize current project for self-optimizing loop")
     init_parser.add_argument("--workspace", default=".", help="project workspace (default: current directory)")
     init_parser.add_argument("--skip-agents", action="store_true", help="do not update AGENTS.md managed block")
-    init_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `aoso-skill update`")
+    init_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `optsmith update`")
     init_parser.add_argument("--repo", default=DEFAULT_REPO, help=argparse.SUPPRESS)
     init_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
     init_parser.set_defaults(func=_cmd_init)
@@ -219,28 +219,28 @@ def _build_parser() -> argparse.ArgumentParser:
     dashboard_parser.add_argument("--workspace", default=".", help="project workspace (default: current directory)")
     dashboard_parser.add_argument("--host", default="127.0.0.1", help="dashboard host (default: 127.0.0.1)")
     dashboard_parser.add_argument("--port", type=int, default=8765, help="dashboard port (default: 8765)")
-    dashboard_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `aoso-skill update`")
+    dashboard_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `optsmith update`")
     dashboard_parser.add_argument("--repo", default=DEFAULT_REPO, help=argparse.SUPPRESS)
     dashboard_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
     dashboard_parser.set_defaults(func=_cmd_dashboard)
 
     run_parser = subparsers.add_parser("run", help="run auto loop collection+analysis command")
     run_parser.add_argument("--workspace", default=".", help="project workspace (default: current directory)")
-    run_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `aoso-skill update`")
+    run_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `optsmith update`")
     run_parser.add_argument("--repo", default=DEFAULT_REPO, help=argparse.SUPPRESS)
     run_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
     run_parser.set_defaults(func=_cmd_run)
 
     metrics_parser = subparsers.add_parser("metrics", help="run metrics report command")
     metrics_parser.add_argument("--workspace", default=".", help="project workspace (default: current directory)")
-    metrics_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `aoso-skill update`")
+    metrics_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `optsmith update`")
     metrics_parser.add_argument("--repo", default=DEFAULT_REPO, help=argparse.SUPPRESS)
     metrics_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
     metrics_parser.set_defaults(func=_cmd_metrics)
 
     optimize_parser = subparsers.add_parser("optimize", help="run optimize skill command")
     optimize_parser.add_argument("--workspace", default=".", help="project workspace (default: current directory)")
-    optimize_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `aoso-skill update`")
+    optimize_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `optsmith update`")
     optimize_parser.add_argument("--repo", default=DEFAULT_REPO, help=argparse.SUPPRESS)
     optimize_parser.add_argument("--skill-path", default=DEFAULT_SKILL_PATH, help=argparse.SUPPRESS)
     optimize_parser.set_defaults(func=_cmd_optimize)

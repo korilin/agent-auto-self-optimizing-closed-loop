@@ -5,7 +5,7 @@ script_dir="$(cd "$(dirname "$0")" && pwd)"
 repo_root="$(git -C "${script_dir}" rev-parse --show-toplevel 2>/dev/null || (cd "${script_dir}/../../../.." && pwd))"
 
 src_dir="${repo_root}/scripts"
-dst_dir="${repo_root}/skills/agent-self-optimizing-loop/scripts"
+dst_dir="${repo_root}/skills/agent-optsmith-loop/scripts"
 
 runtime_scripts=(
   "log_task_run.sh"

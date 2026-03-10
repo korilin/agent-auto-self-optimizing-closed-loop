@@ -10,27 +10,27 @@
 
 ## 接入方式（唯一推荐）
 
-通过 `aoso-skill` CLI 安装与操作，业务仓库只保留本地数据目录 `.agent-loop-data/`。
+通过 `optsmith` CLI 安装与操作，业务仓库只保留本地数据目录 `.agent-loop-data/`。
 
-## 1) 安装 `aoso-skill` CLI
+## 1) 安装 `optsmith` CLI
 
 ### Homebrew
 
 ```bash
-brew tap korilin/aoso-skill https://github.com/korilin/agent-auto-self-optimizing-closed-loop
-brew install aoso-skill
+brew tap korilin/optsmith https://github.com/korilin/agent-optsmith
+brew install optsmith
 ```
 
 ### pipx
 
 ```bash
-pipx install "git+https://github.com/korilin/agent-auto-self-optimizing-closed-loop.git"
+pipx install "git+https://github.com/korilin/agent-optsmith.git"
 ```
 
 ## 2) 安装或更新运行时 skill
 
 ```bash
-aoso-skill update
+optsmith update
 ```
 
 ## 3) 在目标工程初始化
@@ -38,7 +38,7 @@ aoso-skill update
 在目标工程根目录执行：
 
 ```bash
-aoso-skill init --workspace "$(pwd)"
+optsmith init --workspace "$(pwd)"
 ```
 
 这会创建：
@@ -49,20 +49,20 @@ aoso-skill init --workspace "$(pwd)"
 - `.agent-loop-data/templates/error-entry.md`
 - 不会创建 `.agent-loop-data/skills`
 
-同时会更新（或创建）项目根目录 `AGENTS.md` 里的 `AOSO-SKILL` 托管区块。
+同时会更新（或创建）项目根目录 `AGENTS.md` 里的 `OPTSMITH-SKILL` 托管区块。
 
 ## 4) 日常命令
 
 启动看板：
 
 ```bash
-aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
+optsmith dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 ```
 
 任务完成自动记录建议使用 CLI 命令（由 agent 自动执行）：
 
 ```bash
-aoso-skill run --workspace "$(pwd)" \
+optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -74,16 +74,16 @@ aoso-skill run --workspace "$(pwd)" \
   --success true
 ```
 
-补充：如果未显式传 `--total-tokens/--duration-sec`，`aoso-skill run` 会从本地 Codex session 日志自动回填（`$CODEX_HOME/sessions` 与 `$CODEX_HOME/archived_sessions`，有 `CODEX_THREAD_ID` 时按线程匹配）。
+补充：如果未显式传 `--total-tokens/--duration-sec`，`optsmith run` 会从本地 Codex session 日志自动回填（`$CODEX_HOME/sessions` 与 `$CODEX_HOME/archived_sessions`，有 `CODEX_THREAD_ID` 时按线程匹配）。
 
 ## 在目标工程如何真正生效
 
-1. `AGENTS.md` 中声明：任务执行需使用 `agent-self-optimizing-loop`。
-2. 每个任务结束自动执行 `aoso-skill run ...`。
+1. `AGENTS.md` 中声明：任务执行需使用 `agent-optsmith-loop`。
+2. 每个任务结束自动执行 `optsmith run ...`。
 3. 每个失败事件写一条 error entry（脚本自动分析会读取这些条目）。
 4. 用 dashboard 做日期/skill/指标筛选，并触发优化与新增 skill。
    - 新增或优化后的 skill 默认落在项目 `.agents/skills/`（Codex 可自动读取）。
-   - 不再兼容回退扫描旧目录 `skills/`；如需自定义请设置 `AOSO_LOCAL_SKILLS_DIR`。
+   - 不再兼容回退扫描旧目录 `skills/`；如需自定义请设置 `OPTSMITH_LOCAL_SKILLS_DIR`。
 5. 把确认有效的规则与优化结果回写到 `AGENTS.md` 或 skill。
 
 ## 如何评估是否有效

@@ -5,23 +5,23 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [[ -f "${SCRIPT_DIR}/../SKILL.md" ]]; then
   mode="skill"
-  workspace_dir="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+  workspace_dir="${OPTSMITH_WORKSPACE_DIR:-$(pwd)}"
   workspace_dir="$(cd "${workspace_dir}" && pwd)"
   data_file_default="${workspace_dir}/.agent-loop-data/metrics/task-runs.csv"
   kb_dir_default="${workspace_dir}/.agent-loop-data/knowledge-base/errors"
   report_dir_default="${workspace_dir}/.agent-loop-data/reports/skill-optimization"
 else
   mode="root"
-  workspace_dir="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+  workspace_dir="${OPTSMITH_WORKSPACE_DIR:-$(pwd)}"
   workspace_dir="$(cd "${workspace_dir}" && pwd)"
   data_file_default="${workspace_dir}/.agent-loop-data/metrics/task-runs.csv"
   kb_dir_default="${workspace_dir}/.agent-loop-data/knowledge-base/errors"
   report_dir_default="${workspace_dir}/.agent-loop-data/reports/skill-optimization"
 fi
 
-data_file="${AOSO_DATA_FILE:-${data_file_default}}"
-kb_dir="${AOSO_KB_DIR:-${kb_dir_default}}"
-report_dir="${AOSO_OPT_REPORT_DIR:-${report_dir_default}}"
+data_file="${OPTSMITH_DATA_FILE:-${data_file_default}}"
+kb_dir="${OPTSMITH_KB_DIR:-${kb_dir_default}}"
+report_dir="${OPTSMITH_OPT_REPORT_DIR:-${report_dir_default}}"
 
 skill_name=""
 start_date=""
@@ -115,7 +115,7 @@ if [[ -n "${cutover}" ]]; then
   metrics_cmd+=(--cutover "${cutover}")
 fi
 
-metrics_output="$(AOSO_DATA_FILE="${filtered_data}" "${metrics_cmd[@]}")"
+metrics_output="$(OPTSMITH_DATA_FILE="${filtered_data}" "${metrics_cmd[@]}")"
 
 extract_metric() {
   local key="$1"

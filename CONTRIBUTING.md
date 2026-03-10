@@ -10,7 +10,7 @@
 ## Local Validation
 
 ```bash
-cd agent-auto-self-optimizing-closed-loop
+cd agent-optsmith
 
 ./scripts/create_skill.sh sample-skill
 ./scripts/weekly_review.sh

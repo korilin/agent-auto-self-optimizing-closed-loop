@@ -1,4 +1,4 @@
-# Agent 自动自优化闭环（用户手册）
+# Agent Optsmith（用户手册）
 
 <!-- README_SYNC_VERSION: 2026-03-10 -->
 
@@ -31,24 +31,24 @@
 - `reports/`
 - `templates/error-entry.md`
 
-## 2. 安装 `aoso-skill` CLI（无 Submodule）
+## 2. 安装 `optsmith` CLI（无 Submodule）
 
 可选 Homebrew 或 pipx：
 
 ```bash
-brew tap korilin/aoso-skill https://github.com/korilin/agent-auto-self-optimizing-closed-loop
-brew install aoso-skill
+brew tap korilin/optsmith https://github.com/korilin/agent-optsmith
+brew install optsmith
 ```
 
 ```bash
-pipx install "git+https://github.com/korilin/agent-auto-self-optimizing-closed-loop.git"
+pipx install "git+https://github.com/korilin/agent-optsmith.git"
 ```
 
 然后执行运行时 skill 安装/升级：
 
 ```bash
-aoso-skill update
-aoso-skill help
+optsmith update
+optsmith help
 ```
 
 ## 3. 在你的项目里做一次初始化
@@ -56,7 +56,7 @@ aoso-skill help
 在目标项目根目录运行：
 
 ```bash
-aoso-skill init --workspace "$(pwd)"
+optsmith init --workspace "$(pwd)"
 ```
 
 预期结果：
@@ -66,14 +66,14 @@ aoso-skill init --workspace "$(pwd)"
 - 自动创建 `.agent-loop-data/reports/`。
 - 自动创建 `.agent-loop-data/templates/error-entry.md`。
 - `init` 不会创建 `.agent-loop-data/skills`。
-- 自动更新或创建 `AGENTS.md` 中的 `AOSO-SKILL` 托管区块。
+- 自动更新或创建 `AGENTS.md` 中的 `OPTSMITH-SKILL` 托管区块。
 
 ## 4. 日常使用路径（全自动）
 
 1. 在 agent 工作流中，任务完成后应自动执行此命令（采集 + 分析 + 周报）：
 
 ```bash
-aoso-skill run --workspace "$(pwd)" \
+optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -86,7 +86,7 @@ aoso-skill run --workspace "$(pwd)" \
   --rework-count 0
 ```
 
-如果未显式传入 telemetry，`aoso-skill run` 会尝试从本地 Codex session 日志
+如果未显式传入 telemetry，`optsmith run` 会尝试从本地 Codex session 日志
 自动解析真实值（`$CODEX_HOME/sessions` 和 `$CODEX_HOME/archived_sessions`，有
 `CODEX_THREAD_ID` 时优先按线程匹配）。在非 Codex 运行器里，仍建议显式传入
 `total_tokens` / `duration_sec`（或设置 `CODEX_TOTAL_TOKENS`、`CODEX_TASK_DURATION_SEC`）。
@@ -94,40 +94,40 @@ aoso-skill run --workspace "$(pwd)" \
 2. 打开看板做筛选、优化发现和直接执行：
 
 ```bash
-aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
+optsmith dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 ```
 
 然后访问 `http://127.0.0.1:8765`。
 在 `Skill Optimization Discovery` 区域可对现有 skill 立即执行优化。
 在 `New Skill Recommendations` 区域可一键创建并优化新增 skill。
 新增或优化后的 skill 文件默认写入项目 `.agents/skills/`（Codex 可自动读取的项目级目录）。
-项目内不再回退扫描旧目录 `skills/`。如需自定义路径，请设置 `AOSO_LOCAL_SKILLS_DIR`。
+项目内不再回退扫描旧目录 `skills/`。如需自定义路径，请设置 `OPTSMITH_LOCAL_SKILLS_DIR`。
 
 3. 如需原始命令输出（可选）：
 
 ```bash
-aoso-skill metrics --workspace "$(pwd)" --all
-aoso-skill metrics --workspace "$(pwd)" --skill log-analysis-helper
-aoso-skill metrics --workspace "$(pwd)" --all --cutover YYYY-MM-DD
-aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
+optsmith metrics --workspace "$(pwd)" --all
+optsmith metrics --workspace "$(pwd)" --skill log-analysis-helper
+optsmith metrics --workspace "$(pwd)" --all --cutover YYYY-MM-DD
+optsmith optimize --workspace "$(pwd)" --skill log-analysis-helper
 ```
 
 4. 需要升级运行时 skill 时执行：
 
 ```bash
-aoso-skill update
+optsmith update
 ```
 
 ### 完整闭环流程图
 
-![AOSO 闭环流程图](docs/assets/self-optimization-closed-loop-flow.png)
+![Optsmith 闭环流程图](docs/assets/self-optimization-closed-loop-flow.png)
 
 这张图的阅读顺序：
 
 1. 优化发现时机：
-- 每次任务完成触发 `aoso-skill run`，以及每次 dashboard 刷新 `/api/report` 时都会重新计算优化机会。
+- 每次任务完成触发 `optsmith run`，以及每次 dashboard 刷新 `/api/report` 时都会重新计算优化机会。
 2. 优化发现机制：
-- 基于 `aoso-skill metrics`、weekly review、机会评分和新增 skill 推荐逻辑得出候选项。
+- 基于 `optsmith metrics`、weekly review、机会评分和新增 skill 推荐逻辑得出候选项。
 3. 数据记录保存位置：
 - 运行记录：`.agent-loop-data/metrics/task-runs.csv`
 - 失败知识库：`.agent-loop-data/knowledge-base/errors/*.md`

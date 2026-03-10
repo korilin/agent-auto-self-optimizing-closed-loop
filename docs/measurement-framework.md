@@ -76,11 +76,11 @@ Compare:
 If this toolkit is used in another project, point to the project-local data file:
 
 ```bash
-export AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv
+export OPTSMITH_DATA_FILE=.agent-loop-data/metrics/task-runs.csv
 ```
 
 ```bash
-cd agent-auto-self-optimizing-closed-loop
+cd agent-optsmith
 
 # Log one task run
 ./scripts/log_task_run.sh \

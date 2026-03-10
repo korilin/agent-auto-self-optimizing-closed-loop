@@ -50,15 +50,15 @@ for i in 1 2 3 4 5 6; do
   assert_contains "${readme_cn}" "^## ${i}\\." "README_CN.md missing section heading: ## ${i}."
 done
 
-assert_contains "${readme_en}" "brew install aoso-skill" "README.md missing brew install command"
-assert_contains "${readme_cn}" "brew install aoso-skill" "README_CN.md missing brew install command"
+assert_contains "${readme_en}" "brew install optsmith" "README.md missing brew install command"
+assert_contains "${readme_cn}" "brew install optsmith" "README_CN.md missing brew install command"
 assert_contains "${readme_en}" "pipx install" "README.md missing pipx install command"
 assert_contains "${readme_cn}" "pipx install" "README_CN.md missing pipx install command"
-assert_contains "${readme_en}" "aoso-skill update" "README.md missing aoso-skill update command"
-assert_contains "${readme_cn}" "aoso-skill update" "README_CN.md missing aoso-skill update command"
-assert_contains "${readme_en}" "aoso-skill init" "README.md missing aoso-skill init command"
-assert_contains "${readme_cn}" "aoso-skill init" "README_CN.md missing aoso-skill init command"
-assert_contains "${readme_en}" "aoso-skill dashboard" "README.md missing aoso-skill dashboard command"
-assert_contains "${readme_cn}" "aoso-skill dashboard" "README_CN.md missing aoso-skill dashboard command"
+assert_contains "${readme_en}" "optsmith update" "README.md missing optsmith update command"
+assert_contains "${readme_cn}" "optsmith update" "README_CN.md missing optsmith update command"
+assert_contains "${readme_en}" "optsmith init" "README.md missing optsmith init command"
+assert_contains "${readme_cn}" "optsmith init" "README_CN.md missing optsmith init command"
+assert_contains "${readme_en}" "optsmith dashboard" "README.md missing optsmith dashboard command"
+assert_contains "${readme_cn}" "optsmith dashboard" "README_CN.md missing optsmith dashboard command"
 
 echo "README sync check passed (version: ${version_en})"

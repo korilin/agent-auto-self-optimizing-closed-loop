@@ -30,22 +30,22 @@
 4. 修改 CI 配置。
 5. 修改流程文档（含 README、操作手册、工作流说明）。
 
-推荐直接使用本仓库维护 skill：`.agents/skills/aoso-repo-maintainer/`。
+推荐直接使用本仓库维护 skill：`.agents/skills/optsmith-repo-maintainer/`。
 
 目录分层约定：
 
-- `.agents/skills/aoso-repo-maintainer/`：仅本仓库自用的维护 skill（面向仓库作者）。
-- `skills/agent-self-optimizing-loop/`：对外分发的可安装 skill（面向接入项目用户）。
+- `.agents/skills/optsmith-repo-maintainer/`：仅本仓库自用的维护 skill（面向仓库作者）。
+- `skills/agent-optsmith-loop/`：对外分发的可安装 skill（面向接入项目用户）。
 
 ## 4. 提交前必做流程（强制）
 
 ### Step A：如果改了 runtime 脚本，先做脚本同步
 
 ```bash
-.agents/skills/aoso-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh
+.agents/skills/optsmith-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh
 ```
 
-用途：把 `scripts/` 的 runtime 实现同步到 `skills/agent-self-optimizing-loop/scripts/`。
+用途：把 `scripts/` 的 runtime 实现同步到 `skills/agent-optsmith-loop/scripts/`。
 
 ### Step B：同步中英文 README 并保持版本号一致
 
@@ -58,13 +58,13 @@
 校验命令：
 
 ```bash
-.agents/skills/aoso-repo-maintainer/scripts/check_readme_sync.sh
+.agents/skills/optsmith-repo-maintainer/scripts/check_readme_sync.sh
 ```
 
 ### Step C：跑仓库级总校验
 
 ```bash
-.agents/skills/aoso-repo-maintainer/scripts/validate_repo_workflow.sh
+.agents/skills/optsmith-repo-maintainer/scripts/validate_repo_workflow.sh
 ```
 
 该命令会覆盖：
@@ -80,7 +80,7 @@
 ### Step D：自动提交（通过校验后）
 
 ```bash
-.agents/skills/aoso-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"
+.agents/skills/optsmith-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"
 ```
 
 说明：
@@ -109,7 +109,7 @@
   - 同步到 installable skill
   - 跑 `validate_repo_workflow.sh`
   - 若行为变化，更新 README / docs
-- 改 `skills/agent-self-optimizing-loop/`：
+- 改 `skills/agent-optsmith-loop/`：
   - 跑 `validate_repo_workflow.sh`
   - 确认命令示例与文档一致
 - 改 README：
@@ -123,7 +123,7 @@
 
 ### 初始化模板单一来源（重要）
 
-- 项目初始化模板只保留一个来源：`skills/agent-self-optimizing-loop/templates/workspace/`。
+- 项目初始化模板只保留一个来源：`skills/agent-optsmith-loop/templates/workspace/`。
 - `setup_loop_workspace.sh` 必须从该目录拷贝初始化文件与目录，不允许再在脚本内联维护另一套模板内容。
 - `init` 目录结构不应创建 `.agent-loop-data/skills`；skill 产物默认落在项目 `.agents/skills/`。
 

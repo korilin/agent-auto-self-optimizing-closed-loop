@@ -3,7 +3,7 @@ set -euo pipefail
 
 skill_src="$(cd "$(dirname "$0")/.." && pwd)"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
-dest="${codex_home}/skills/aoso-repo-maintainer"
+dest="${codex_home}/skills/optsmith-repo-maintainer"
 backup=""
 
 mkdir -p "${codex_home}/skills"

@@ -5,16 +5,16 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [[ -f "${SCRIPT_DIR}/../SKILL.md" ]]; then
   mode="skill"
-  workspace_dir="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+  workspace_dir="${OPTSMITH_WORKSPACE_DIR:-$(pwd)}"
   workspace_dir="$(cd "${workspace_dir}" && pwd)"
   setup_script="${SCRIPT_DIR}/setup_loop_workspace.sh"
 else
   mode="root"
   root_dir="$(cd "${SCRIPT_DIR}/.." && pwd)"
   if [[ "$(basename "${root_dir}")" == ".agent-loop" ]]; then
-    workspace_dir="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+    workspace_dir="${OPTSMITH_WORKSPACE_DIR:-$(pwd)}"
   else
-    workspace_dir="${AOSO_WORKSPACE_DIR:-${root_dir}}"
+    workspace_dir="${OPTSMITH_WORKSPACE_DIR:-${root_dir}}"
   fi
   workspace_dir="$(cd "${workspace_dir}" && pwd)"
   setup_script=""
@@ -22,16 +22,16 @@ fi
 
 date_val="$(date +%Y-%m-%d)"
 task_id="TASK-$(date +%Y%m%d-%H%M%S)"
-task_type="${AOSO_TASK_TYPE:-coding}"
-project="${AOSO_PROJECT:-$(basename "${workspace_dir}")}"
-model="${AOSO_MODEL:-gpt-5}"
-used_skill="${AOSO_USED_SKILL:-true}"
-skill_name="${AOSO_SKILL_NAME:-agent-self-optimizing-loop}"
-total_tokens="${AOSO_TOTAL_TOKENS:-}"
-duration_sec="${AOSO_DURATION_SEC:-}"
-success="${AOSO_SUCCESS:-true}"
-rework_count="${AOSO_REWORK_COUNT:-0}"
-cutover="${AOSO_CUTOVER:-}"
+task_type="${OPTSMITH_TASK_TYPE:-coding}"
+project="${OPTSMITH_PROJECT:-$(basename "${workspace_dir}")}"
+model="${OPTSMITH_MODEL:-gpt-5}"
+used_skill="${OPTSMITH_USED_SKILL:-true}"
+skill_name="${OPTSMITH_SKILL_NAME:-agent-optsmith-loop}"
+total_tokens="${OPTSMITH_TOTAL_TOKENS:-}"
+duration_sec="${OPTSMITH_DURATION_SEC:-}"
+success="${OPTSMITH_SUCCESS:-true}"
+rework_count="${OPTSMITH_REWORK_COUNT:-0}"
+cutover="${OPTSMITH_CUTOVER:-}"
 run_weekly="true"
 enforce_telemetry="false"
 tokens_from_session="false"
@@ -68,10 +68,10 @@ Description:
 Telemetry values are resolved in this order:
   - explicit CLI args (--total-tokens / --duration-sec)
   - env overrides:
-      tokens: AOSO_TOTAL_TOKENS, CODEX_TOTAL_TOKENS, OPENAI_TOTAL_TOKENS, TASK_TOTAL_TOKENS
-      duration: AOSO_DURATION_SEC, CODEX_TASK_DURATION_SEC, TASK_DURATION_SEC
+      tokens: OPTSMITH_TOTAL_TOKENS, CODEX_TOTAL_TOKENS, OPENAI_TOTAL_TOKENS, TASK_TOTAL_TOKENS
+      duration: OPTSMITH_DURATION_SEC, CODEX_TASK_DURATION_SEC, TASK_DURATION_SEC
   - fallback duration from task start timestamp:
-      AOSO_TASK_START_TS or TASK_START_TS (unix epoch seconds)
+      OPTSMITH_TASK_START_TS or TASK_START_TS (unix epoch seconds)
   - fallback from local Codex session logs:
       CODEX_HOME/sessions and CODEX_HOME/archived_sessions
       (thread match uses CODEX_THREAD_ID when available)
@@ -106,7 +106,7 @@ resolve_codex_session_file() {
   local codex_home="${CODEX_HOME:-$HOME/.codex}"
   local session_override
   session_override="$(first_non_empty \
-    "${AOSO_CODEX_SESSION_FILE:-}" \
+    "${OPTSMITH_CODEX_SESSION_FILE:-}" \
     "${CODEX_SESSION_FILE:-}" || true)"
   if [[ -n "${session_override}" && -f "${session_override}" ]]; then
     printf '%s' "${session_override}"
@@ -115,7 +115,7 @@ resolve_codex_session_file() {
 
   local thread_id
   thread_id="$(first_non_empty \
-    "${AOSO_CODEX_THREAD_ID:-}" \
+    "${OPTSMITH_CODEX_THREAD_ID:-}" \
     "${CODEX_THREAD_ID:-}" || true)"
 
   local candidate_dirs=(
@@ -287,7 +287,7 @@ fi
 
 if [[ -z "${total_tokens}" ]]; then
   total_tokens="$(first_non_empty \
-    "${AOSO_TOTAL_TOKENS:-}" \
+    "${OPTSMITH_TOTAL_TOKENS:-}" \
     "${CODEX_TOTAL_TOKENS:-}" \
     "${OPENAI_TOTAL_TOKENS:-}" \
     "${TASK_TOTAL_TOKENS:-}" || true)"
@@ -295,14 +295,14 @@ fi
 
 if [[ -z "${duration_sec}" ]]; then
   duration_sec="$(first_non_empty \
-    "${AOSO_DURATION_SEC:-}" \
+    "${OPTSMITH_DURATION_SEC:-}" \
     "${CODEX_TASK_DURATION_SEC:-}" \
     "${TASK_DURATION_SEC:-}" || true)"
 fi
 
 if [[ -z "${duration_sec}" ]]; then
   duration_sec="$(resolve_duration_from_start_ts "$(first_non_empty \
-    "${AOSO_TASK_START_TS:-}" \
+    "${OPTSMITH_TASK_START_TS:-}" \
     "${TASK_START_TS:-}" || true)" || true)"
 fi
 

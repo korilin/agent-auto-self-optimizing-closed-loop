@@ -11,16 +11,16 @@ run_push="true"
 
 date_val="$(date +%Y-%m-%d)"
 task_id="TASK-$(date +%Y%m%d-%H%M%S)"
-task_type="${AOSO_TASK_TYPE:-repo-maintenance}"
-project="${AOSO_PROJECT:-$(basename "${repo_root}")}"
-model="${AOSO_MODEL:-gpt-5}"
-used_skill="${AOSO_USED_SKILL:-true}"
-skill_name="${AOSO_SKILL_NAME:-aoso-repo-maintainer}"
-total_tokens="${AOSO_TOTAL_TOKENS:-}"
-duration_sec="${AOSO_DURATION_SEC:-}"
-success="${AOSO_SUCCESS:-true}"
-rework_count="${AOSO_REWORK_COUNT:-0}"
-cutover="${AOSO_CUTOVER:-}"
+task_type="${OPTSMITH_TASK_TYPE:-repo-maintenance}"
+project="${OPTSMITH_PROJECT:-$(basename "${repo_root}")}"
+model="${OPTSMITH_MODEL:-gpt-5}"
+used_skill="${OPTSMITH_USED_SKILL:-true}"
+skill_name="${OPTSMITH_SKILL_NAME:-optsmith-repo-maintainer}"
+total_tokens="${OPTSMITH_TOTAL_TOKENS:-}"
+duration_sec="${OPTSMITH_DURATION_SEC:-}"
+success="${OPTSMITH_SUCCESS:-true}"
+rework_count="${OPTSMITH_REWORK_COUNT:-0}"
+cutover="${OPTSMITH_CUTOVER:-}"
 
 has_repo_changes() {
   if ! git diff --quiet; then
@@ -38,7 +38,7 @@ has_repo_changes() {
 usage() {
   cat <<'EOF'
 Usage:
-  .agents/skills/aoso-repo-maintainer/scripts/auto_commit.sh [options]
+  .agents/skills/optsmith-repo-maintainer/scripts/auto_commit.sh [options]
 
 Options:
   --message "<commit-message>"

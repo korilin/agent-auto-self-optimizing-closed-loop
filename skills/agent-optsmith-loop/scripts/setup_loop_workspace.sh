@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-workspace_dir="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+workspace_dir="${OPTSMITH_WORKSPACE_DIR:-$(pwd)}"
 
 usage() {
   cat <<'EOF'
@@ -39,10 +39,10 @@ fi
 
 workspace_dir="$(cd "${workspace_dir}" && pwd)"
 
-data_root="${AOSO_DATA_ROOT:-${workspace_dir}/.agent-loop-data}"
-metrics_file="${AOSO_DATA_FILE:-${data_root}/metrics/task-runs.csv}"
-kb_dir="${AOSO_KB_DIR:-${data_root}/knowledge-base/errors}"
-report_dir="${AOSO_REPORT_DIR:-${data_root}/reports}"
+data_root="${OPTSMITH_DATA_ROOT:-${workspace_dir}/.agent-loop-data}"
+metrics_file="${OPTSMITH_DATA_FILE:-${data_root}/metrics/task-runs.csv}"
+kb_dir="${OPTSMITH_KB_DIR:-${data_root}/knowledge-base/errors}"
+report_dir="${OPTSMITH_REPORT_DIR:-${data_root}/reports}"
 templates_dir="${data_root}/templates"
 error_template="${templates_dir}/error-entry.md"
 template_root="${SCRIPT_DIR}/../templates/workspace"

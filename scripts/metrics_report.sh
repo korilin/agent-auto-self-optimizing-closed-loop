@@ -2,10 +2,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-WORKSPACE_DIR="${AOSO_WORKSPACE_DIR:-$(pwd)}"
+WORKSPACE_DIR="${OPTSMITH_WORKSPACE_DIR:-$(pwd)}"
 WORKSPACE_DIR="$(cd "${WORKSPACE_DIR}" && pwd)"
 DATA_FILE_DEFAULT="${WORKSPACE_DIR}/.agent-loop-data/metrics/task-runs.csv"
-DATA_FILE="${AOSO_DATA_FILE:-${DATA_FILE_DEFAULT}}"
+DATA_FILE="${OPTSMITH_DATA_FILE:-${DATA_FILE_DEFAULT}}"
 mode=""
 skill_name=""
 cutover=""
@@ -13,7 +13,7 @@ cutover=""
 usage() {
   cat <<'EOF'
 Usage:
-  AOSO_DATA_FILE=.agent-loop-data/metrics/task-runs.csv ./scripts/metrics_report.sh --all
+  OPTSMITH_DATA_FILE=.agent-loop-data/metrics/task-runs.csv ./scripts/metrics_report.sh --all
 
   ./scripts/metrics_report.sh --all [--cutover YYYY-MM-DD]
   ./scripts/metrics_report.sh --skill <skill-name> [--cutover YYYY-MM-DD]

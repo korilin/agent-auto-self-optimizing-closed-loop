@@ -3,25 +3,25 @@
 ## 0) CLI entrypoint (no submodule)
 
 ```bash
-aoso-skill update
-aoso-skill init --workspace "$(pwd)"
-aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
-aoso-skill run --workspace "$(pwd)" --task-id TASK-1001 --task-type debug --project my-service --model gpt-5 --used-skill true --skill-name log-analysis-helper --success true
-aoso-skill metrics --workspace "$(pwd)" --all
-aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
-aoso-skill help
+optsmith update
+optsmith init --workspace "$(pwd)"
+optsmith dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
+optsmith run --workspace "$(pwd)" --task-id TASK-1001 --task-type debug --project my-service --model gpt-5 --used-skill true --skill-name log-analysis-helper --success true
+optsmith metrics --workspace "$(pwd)" --all
+optsmith optimize --workspace "$(pwd)" --skill log-analysis-helper
+optsmith help
 ```
 
 ## 1) Initialize project data folder
 
 ```bash
-aoso-skill init --workspace "$(pwd)"
+optsmith init --workspace "$(pwd)"
 ```
 
 ## 2) Auto-run one full loop
 
 ```bash
-aoso-skill run --workspace "$(pwd)" \
+optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -38,7 +38,7 @@ aoso-skill run --workspace "$(pwd)" \
 ```bash
 CODEX_TOTAL_TOKENS=1820 \
 CODEX_TASK_DURATION_SEC=420 \
-aoso-skill run --workspace "$(pwd)" \
+optsmith run --workspace "$(pwd)" \
   --task-id TASK-1002 \
   --task-type debug \
   --project my-service \
@@ -49,13 +49,13 @@ aoso-skill run --workspace "$(pwd)" \
   --enforce-telemetry
 ```
 
-If explicit telemetry is omitted, `aoso-skill run` will try to resolve values from local
+If explicit telemetry is omitted, `optsmith run` will try to resolve values from local
 Codex session logs (`$CODEX_HOME/sessions` and `$CODEX_HOME/archived_sessions`).
 
 ## 3) Log one task run (direct)
 
 ```bash
-aoso-skill run --workspace "$(pwd)" \
+optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
   --project my-service \
@@ -71,28 +71,28 @@ aoso-skill run --workspace "$(pwd)" \
 ## 4) Measure skill effect
 
 ```bash
-aoso-skill metrics --workspace "$(pwd)" --skill log-analysis-helper
+optsmith metrics --workspace "$(pwd)" --skill log-analysis-helper
 ```
 
 ## 5) Measure engineering pre/post effect
 
 ```bash
-aoso-skill metrics --workspace "$(pwd)" --all --cutover 2026-03-01
+optsmith metrics --workspace "$(pwd)" --all --cutover 2026-03-01
 ```
 
 ## 6) Generate weekly review
 
-Weekly review is included in `aoso-skill run` by default.
+Weekly review is included in `optsmith run` by default.
 If you only want task logging + metrics without weekly review, add `--skip-weekly`.
 
 ## 7) Open the local dashboard
 
 ```bash
-aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
+optsmith dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 ```
 
 ## 8) Trigger optimization plan for one skill
 
 ```bash
-aoso-skill optimize --workspace "$(pwd)" --skill log-analysis-helper
+optsmith optimize --workspace "$(pwd)" --skill log-analysis-helper
 ```
