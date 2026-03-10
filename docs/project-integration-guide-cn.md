@@ -82,7 +82,7 @@ aoso-skill run --workspace "$(pwd)" \
 2. 每个任务结束自动执行 `aoso-skill run ...`。
 3. 每个失败事件写一条 error entry（脚本自动分析会读取这些条目）。
 4. 用 dashboard 做日期/skill/指标筛选，并触发优化与新增 skill。
-   - 新增或优化后的 skill 默认落在项目根目录 `skills/`。
+   - 新增或优化后的 skill 默认落在项目 `.agents/skills/`（Codex 可自动读取）。
 5. 把确认有效的规则与优化结果回写到 `AGENTS.md` 或 skill。
 
 ## 如何评估是否有效

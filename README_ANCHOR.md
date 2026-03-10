@@ -119,7 +119,7 @@ skills/aoso-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"
 
 - 项目初始化模板只保留一个来源：`skills/agent-self-optimizing-loop/templates/workspace/`。
 - `setup_loop_workspace.sh` 必须从该目录拷贝初始化文件与目录，不允许再在脚本内联维护另一套模板内容。
-- `init` 目录结构不应创建 `.agent-loop-data/skills`；skill 产物默认落在项目根 `skills/`。
+- `init` 目录结构不应创建 `.agent-loop-data/skills`；skill 产物默认落在项目 `.agents/skills/`。
 
 ## 7. 常见失败与快速排查
 

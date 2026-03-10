@@ -100,7 +100,8 @@ aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 Then open `http://127.0.0.1:8765`.
 Use the `Skill Optimization Discovery` section to optimize one skill immediately.
 Use `New Skill Recommendations` to create-and-optimize a new skill immediately.
-New or optimized skill files are written under project `skills/` by default.
+New or optimized skill files are written under project `.agents/skills/` by default
+(Codex auto-readable project skill directory).
 
 3. Optional direct report commands (if you need raw CLI output):
 

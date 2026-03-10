@@ -58,7 +58,7 @@ aoso-skill dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
 
 Use `Skill Optimization Discovery` in the dashboard to optimize existing skills immediately.
 Use `New Skill Recommendations` to create-and-optimize candidate new skills immediately.
-New or optimized skill files are written under project `skills/`.
+New or optimized skill files are written under project `.agents/skills/`.
 
 5. Optional direct commands (if you need script-level outputs):
 ```bash
