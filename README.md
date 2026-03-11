@@ -150,11 +150,10 @@ optsmith uninstall --workspace "$(pwd)"
 
 How to read this flow:
 
-1. Stages 1-2: task capture and metric calculation rules.
-2. Stages 3-4: discovery triggers and immediate optimization actions.
-3. Stages 5-6: where optimization state is persisted and how before/after is verified.
-4. Stage 7: governance rule for promoting only verified gains.
-5. Bottom note: date-granularity constraints and strict comparison recommendations.
+1. Top subgraph (`Loop Overview`) is the continuous optimization loop.
+2. Bottom-left subgraph (`Scenario A`) is the auto path after task completion.
+3. Bottom-right subgraph (`Scenario B`) is the dashboard-triggered optimization path.
+4. Cross-subgraph arrows show how loop nodes trigger each scenario and how both scenario outputs return to `Effect Verification`.
 
 ## 5. How to Interpret Results Correctly
 
