@@ -58,6 +58,27 @@ Run this in the target project root:
 optsmith install --workspace "$(pwd)"
 ```
 
+Install parameters:
+
+- `--workspace <path>`: target project directory (default: current directory).
+- `--data-dir <path>`: data root used for metrics/KB/reports (default: `.agents/optsmith-data`).
+- `--skill-path <path>`: project skill root where `agent-optsmith` is installed (default: `.agents/skills`).
+- `--skip-agents`: skip writing/updating the managed `OPTSMITH-SKILL` block in `AGENTS.md`.
+
+Path behavior:
+
+- Relative paths are resolved relative to `--workspace`.
+- For safety, `data-dir` and `skill-path` must stay inside the workspace.
+
+Custom path example:
+
+```bash
+optsmith install \
+  --workspace "$(pwd)" \
+  --data-dir ".agents/custom-optsmith-data" \
+  --skill-path ".agents/custom-skills"
+```
+
 Expected result:
 
 - `.agents/optsmith-data/metrics/task-runs.csv` created (with header).

@@ -58,6 +58,27 @@ optsmith help
 optsmith install --workspace "$(pwd)"
 ```
 
+install 参数说明：
+
+- `--workspace <path>`：目标项目目录（默认当前目录）。
+- `--data-dir <path>`：指标/知识库/报告的数据根目录（默认 `.agents/optsmith-data`）。
+- `--skill-path <path>`：项目 skill 根目录，`agent-optsmith` 会安装到该目录下（默认 `.agents/skills`）。
+- `--skip-agents`：跳过写入/更新 `AGENTS.md` 的 `OPTSMITH-SKILL` 托管区块。
+
+路径规则：
+
+- 相对路径会按 `--workspace` 进行解析。
+- 出于安全考虑，`data-dir` 和 `skill-path` 必须位于 workspace 内。
+
+自定义目录示例：
+
+```bash
+optsmith install \
+  --workspace "$(pwd)" \
+  --data-dir ".agents/custom-optsmith-data" \
+  --skill-path ".agents/custom-skills"
+```
+
 预期结果：
 
 - 自动创建 `.agents/optsmith-data/metrics/task-runs.csv`（含表头）。
