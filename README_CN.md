@@ -47,6 +47,7 @@ pipx install "git+https://github.com/korilin/agent-optsmith.git"
 然后验证 CLI 可用：
 
 ```bash
+optsmith version
 optsmith help
 ```
 

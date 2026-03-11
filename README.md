@@ -47,6 +47,7 @@ pipx install "git+https://github.com/korilin/agent-optsmith.git"
 Then verify the CLI entrypoint:
 
 ```bash
+optsmith version
 optsmith help
 ```
 

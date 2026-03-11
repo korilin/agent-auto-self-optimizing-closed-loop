@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from optsmith_cli import __version__
+
 
 SKILL_NAME = "agent-optsmith"
 DEFAULT_SKILL_DIR = ".agents/skills"
@@ -357,10 +359,22 @@ def _cmd_optimize(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_version(args: argparse.Namespace) -> int:
+    del args
+    print(__version__)
+    return 0
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="optsmith",
         description="Agent Optsmith CLI for project-local installation, updates, telemetry, and optimization.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="show CLI version",
     )
     subparsers = parser.add_subparsers(dest="command")
 
@@ -412,11 +426,14 @@ def _build_parser() -> argparse.ArgumentParser:
     optimize_parser.add_argument("--no-auto-update", action="store_true", help="fail instead of auto-running `optsmith update`")
     optimize_parser.set_defaults(func=_cmd_optimize)
 
+    version_parser = subparsers.add_parser("version", help="show CLI version")
+    version_parser.set_defaults(func=_cmd_version)
+
     help_parser = subparsers.add_parser("help", help="show help")
     help_parser.add_argument(
         "topic",
         nargs="?",
-        choices=["install", "update", "uninstall", "dashboard", "run", "metrics", "optimize", "help"],
+        choices=["install", "update", "uninstall", "dashboard", "run", "metrics", "optimize", "version", "help"],
     )
     help_parser.set_defaults(func=None)
 
