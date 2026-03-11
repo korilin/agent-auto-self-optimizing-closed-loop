@@ -1,6 +1,6 @@
 # Agent Optsmith (User Guide)
 
-<!-- README_SYNC_VERSION: 2026-03-10 -->
+<!-- README_SYNC_VERSION: 2026-03-11 -->
 
 This project provides an Agent Optsmith workflow for measurable AI coding optimization.
 If your goal is to use the skill in your own repository, this file is the entry point.
@@ -153,44 +153,96 @@ optsmith uninstall --workspace "$(pwd)"
 
 How to read this flow:
 
-1. Discovery timing:
-- On every completed task (`optsmith run`) and every dashboard refresh (`/api/report`), opportunities are recalculated from latest local data.
-2. Discovery mechanism:
-- `optsmith metrics` + weekly review + opportunity scoring + new-skill recommendation logic drive optimization candidates.
-3. Where records are saved:
-- Run data: `.agents/optsmith-data/metrics/task-runs.csv`
-- Error KB: `.agents/optsmith-data/knowledge-base/errors/*.md`
-- Optimization reports: `.agents/optsmith-data/reports/skill-optimization/*`
-4. Where optimization status is saved:
-- `.agents/optsmith-data/reports/dashboard-optimization-state.json`
-- This file is shared by the project, so different browsers can see the same optimized/created status.
-5. Status transition:
-- `DISCOVERED -> TRIGGERED -> APPLIED -> VERIFIED -> PROMOTED`
-- Only `VERIFIED` improvements should be promoted to `AGENTS.md` / stable skills.
+1. Lane 1 (`Task Capture`) shows how one completed task is normalized and appended to `task-runs.csv`.
+2. Lane 2 (`Metrics & Strategy`) shows baseline matching and cutover pre/post calculation logic.
+3. Lane 3 (`Discovery & Action`) shows dashboard discovery timing and immediate optimize/create triggers.
+4. Lane 4 (`Verification & Governance`) shows where optimization state is stored and how gains are verified before promotion.
+5. The bottom legend defines rework semantics and the exact cutover strategy for comparing same-skill before/after.
 
 ## 5. How to Interpret Results Correctly
 
-Comparison method used by this toolkit:
+### 5.1 Effect Validation Strategy (What Is Actually Compared)
 
-1. Compare each skill only against no-skill baseline rows on the same `task_type`.
-2. For skill-level effect:
+1. Skill-level effect:
+- Each skill is compared only with no-skill baseline rows from the same `task_type`.
 - `token_reduction_pct = (baseline_avg_tokens - skill_avg_tokens) / baseline_avg_tokens`
 - `duration_reduction_pct = (baseline_avg_duration - skill_avg_duration) / baseline_avg_duration`
 - `success_rate_delta_pp = skill_success_rate - baseline_success_rate`
 - `rework_rate_delta = skill_rework_rate - baseline_rework_rate`
-3. For cutover pre/post effect:
+
+2. Process-level pre/post effect (cutover):
+- `pre` window: `date < cutover`
+- `post` window: `date >= cutover`
 - `delta_avg_tokens_pct = (post_avg_tokens - pre_avg_tokens) / pre_avg_tokens`
 - `delta_avg_duration_pct = (post_avg_duration - pre_avg_duration) / pre_avg_duration`
 - `delta_success_rate_pp = post_success_rate - pre_success_rate`
 - `delta_tasks_per_day_pct = (post_tasks_per_day - pre_tasks_per_day) / pre_tasks_per_day`
 
-Use these rules to avoid false conclusions:
+3. Suggested validation sequence:
+- Run `optsmith metrics --workspace "$(pwd)" --skill <skill-name>` for skill-vs-baseline effect.
+- Run `optsmith metrics --workspace "$(pwd)" --all --cutover YYYY-MM-DD` for pre/post process effect.
+- In dashboard, apply date + skill filter to inspect trend consistency before concluding.
 
-1. Trust skill comparison only when there is no-skill baseline on the same `task_type`.
-2. If output says `insufficient baseline`, collect more baseline samples first.
-3. Read `success_rate_delta_pp` and `rework_rate_delta` together with token reduction.
-4. Use `--cutover` only when both pre and post windows have enough samples.
-5. In dashboard, use date range + skill filter before comparing metric trends.
+### 5.2 How Same Skill Before/After Optimization Is Distinguished
+
+1. Optimization events are persisted in project files:
+- `.agents/optsmith-data/reports/dashboard-optimization-state.json` (`updated_at`, action, score, status).
+- `.agents/optsmith-data/reports/optimization-history/<skill>.md` (timestamped optimization log).
+- The optimized skill `SKILL.md` auto snapshot block (`updated_at`, status, source report).
+
+2. The recommended cutover is the optimization event date (`updated_at` -> `YYYY-MM-DD`).
+
+3. This is the standard comparison rule:
+- `before`: task rows with `date < cutover`.
+- `after`: task rows with `date >= cutover`.
+- Keep the same `task_type` baseline requirement when interpreting skill deltas.
+
+4. Current data granularity is day-level (`date`), not timestamp-level:
+- If multiple optimizations happen on the same day, they share one cutover day window.
+- For strict separation, avoid multiple optimizations per day for the same skill, or temporarily version skill names during evaluation.
+
+### 5.3 Rework Definition, Identification, and Formula
+
+1. Task identity contract:
+- `task_id` must remain stable when the same business task is reopened.
+
+2. Rework identification contract:
+- If a delivered task is reopened (QA fail, requirement miss, rollback fix), log the next completion with the same `task_id` and incremented `rework_count`.
+- `rework_count=0` means first-pass completion.
+- `rework_count=1/2/...` means reopen rounds occurred before this completion.
+
+3. Current rework metric formula in the toolkit:
+- `rework_rate = SUM(rework_count) / COUNT(task_rows)`
+
+4. Important operational note:
+- The system does not infer rework across different `task_id` values.
+- If your team changes `task_id` on reopen, rework will be undercounted.
+
+### 5.4 Dashboard Discovery Rules (Why Something Is Marked for Optimization)
+
+1. Existing skill opportunity score increases when signals appear:
+- insufficient baseline on matching task types
+- token or duration regression vs baseline
+- success rate drop
+- rework rate increase
+
+2. New skill recommendation score increases when signals appear:
+- no-skill repeats for a task type (`>=3` samples)
+- no-skill token/duration cost is high vs overall
+- failure/rework is high
+- recurring root cause appears in error KB
+
+3. Trigger timing:
+- on every `optsmith run`
+- on every dashboard `/api/report` refresh
+
+### 5.5 Anti-Misread Checklist
+
+1. Do not claim skill gains when output says `insufficient baseline`.
+2. Read token, success, and rework metrics together.
+3. Only compare same `task_type` for skill effect.
+4. Ensure both pre and post windows have enough samples before using cutover deltas.
+5. Treat optimization as verified only after post-window metrics stay improved, not after one short burst.
 
 ## 6. Author/Maintainer Entry
 

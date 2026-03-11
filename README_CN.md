@@ -1,6 +1,6 @@
 # Agent Optsmith（用户手册）
 
-<!-- README_SYNC_VERSION: 2026-03-10 -->
+<!-- README_SYNC_VERSION: 2026-03-11 -->
 
 这个项目用于在你的工程里落地“可量化”的 Agent 优化工匠流程。
 如果你的目标是“作为 skill 使用者快速上手”，请从这份 README 开始。
@@ -149,46 +149,98 @@ optsmith uninstall --workspace "$(pwd)"
 
 ![Agent 优化工匠流程图](docs/assets/agent-optsmith-workflow-flow-zh.png)
 
-这张图的阅读顺序：
+这张图建议按 4 条泳道阅读：
 
-1. 优化发现时机：
-- 每次任务完成触发 `optsmith run`，以及每次 dashboard 刷新 `/api/report` 时都会重新计算优化机会。
-2. 优化发现机制：
-- 基于 `optsmith metrics`、weekly review、机会评分和新增 skill 推荐逻辑得出候选项。
-3. 数据记录保存位置：
-- 运行记录：`.agents/optsmith-data/metrics/task-runs.csv`
-- 失败知识库：`.agents/optsmith-data/knowledge-base/errors/*.md`
-- 优化报告：`.agents/optsmith-data/reports/skill-optimization/*`
-4. 优化状态保存位置：
-- `.agents/optsmith-data/reports/dashboard-optimization-state.json`
-- 这是项目共享文件，所以换浏览器后仍能看到已优化/已创建状态。
-5. 状态变化链路：
-- `DISCOVERED -> TRIGGERED -> APPLIED -> VERIFIED -> PROMOTED`
-- 只有 `VERIFIED` 的收益才建议沉淀到 `AGENTS.md` 与稳定 skill。
+1. `任务采集`：任务完成后如何标准化并写入 `task-runs.csv`。
+2. `指标分析与策略`：baseline 匹配和 cutover 前后对比如何计算。
+3. `发现与执行`：看板何时发现机会、何时可直接触发优化/新增 skill。
+4. `验证与治理`：优化状态落盘位置、如何验证收益、何时允许沉淀规则。
+5. 图底部 `关键定义` 汇总了返工口径和“同一 skill 优化前后”的切分方法。
 
 ## 5. 如何正确解读输出
 
-本工具的对比口径如下：
+### 5.1 效果验证策略（到底在比较什么）
 
-1. 单个 skill 只和同 `task_type` 的 no-skill baseline 对比。
-2. skill 级效果：
+1. skill 级效果：
+- 每个 skill 只与同 `task_type` 的无 skill baseline 对比。
 - `token_reduction_pct = (baseline_avg_tokens - skill_avg_tokens) / baseline_avg_tokens`
 - `duration_reduction_pct = (baseline_avg_duration - skill_avg_duration) / baseline_avg_duration`
 - `success_rate_delta_pp = skill_success_rate - baseline_success_rate`
 - `rework_rate_delta = skill_rework_rate - baseline_rework_rate`
-3. cutover 前后效果：
+
+2. 流程级 cutover 前后效果：
+- `pre` 窗口：`date < cutover`
+- `post` 窗口：`date >= cutover`
 - `delta_avg_tokens_pct = (post_avg_tokens - pre_avg_tokens) / pre_avg_tokens`
 - `delta_avg_duration_pct = (post_avg_duration - pre_avg_duration) / pre_avg_duration`
 - `delta_success_rate_pp = post_success_rate - pre_success_rate`
 - `delta_tasks_per_day_pct = (post_tasks_per_day - pre_tasks_per_day) / pre_tasks_per_day`
 
-避免误判时，按这 5 条看：
+3. 推荐验证顺序：
+- 先跑 `optsmith metrics --workspace "$(pwd)" --skill <skill-name>` 看 skill 对 baseline 的效果。
+- 再跑 `optsmith metrics --workspace "$(pwd)" --all --cutover YYYY-MM-DD` 看流程级前后变化。
+- 最后在 dashboard 做日期 + skill 筛选，看趋势是否一致。
 
-1. 只有同 `task_type` 存在 no-skill baseline，skill 对比才可靠。
-2. 出现 `insufficient baseline` 说明样本不足，先补 baseline。
-3. 不要只看 token，需结合 `success_rate_delta_pp` 和 `rework_rate_delta`。
-4. `--cutover` 对比需要 pre/post 都有足够样本。
-5. 在看板中先做日期和 skill 筛选，再比较指标趋势。
+### 5.2 同一个 Skill 的优化前后如何区分
+
+1. 优化事件会落盘到项目文件：
+- `.agents/optsmith-data/reports/dashboard-optimization-state.json`（含 `updated_at`、动作、得分、状态）。
+- `.agents/optsmith-data/reports/optimization-history/<skill>.md`（时间戳优化日志）。
+- 被优化 skill 的 `SKILL.md` 自动快照区块（含 `updated_at`、状态、来源报告）。
+
+2. 建议把优化事件日期（`updated_at` -> `YYYY-MM-DD`）作为 cutover。
+
+3. 标准切分方法：
+- `before`：`date < cutover` 的任务行。
+- `after`：`date >= cutover` 的任务行。
+- 解释 skill delta 时仍需满足“同 task_type baseline”的约束。
+
+4. 当前数据粒度是按天（`date`），不是时间戳级：
+- 同一天内多次优化会落在同一个 cutover 日窗口里。
+- 若要严格隔离，建议同一 skill 每天最多做一次优化，或评估期临时采用版本化 skill 名称。
+
+### 5.3 返工的定义、识别与计算
+
+1. 任务标识约定：
+- 同一个业务任务被重开时，`task_id` 必须保持不变。
+
+2. 返工识别约定：
+- 已交付任务被重开（例如 QA 失败、需求未满足、回滚后补修），下一次完成时应继续用同一个 `task_id`，并提升 `rework_count`。
+- `rework_count=0` 表示首次通过完成。
+- `rework_count=1/2/...` 表示该次完成前经历了 1/2/... 轮重开。
+
+3. 当前工具中的返工率公式：
+- `rework_rate = SUM(rework_count) / COUNT(task_rows)`
+
+4. 关键注意：
+- 系统不会跨不同 `task_id` 自动推断返工。
+- 如果团队在重开时换了 `task_id`，返工率会被低估。
+
+### 5.4 Dashboard 的优化发现规则（为什么会被标记）
+
+1. 现有 skill 的机会评分会在这些信号出现时升高：
+- 匹配 task_type 的 baseline 不足
+- token 或耗时相对 baseline 变差
+- 成功率下降
+- 返工率上升
+
+2. 新增 skill 推荐会在这些信号出现时升高：
+- 某 task_type 的无 skill 任务重复出现（`>=3`）
+- 无 skill 的 token/耗时显著偏高
+- 失败率/返工率偏高
+- error KB 出现复发根因
+
+3. 触发时机：
+- 每次 `optsmith run`
+- 每次 dashboard `/api/report` 刷新
+
+### 5.5 防误判检查清单
+
+1. 出现 `insufficient baseline` 时不要下优化结论。
+2. 不要只看 token，要结合成功率和返工率。
+3. skill 效果只比较同 `task_type`。
+4. 用 cutover 做前后对比时，pre/post 两侧都要有足够样本。
+5. 只有在 post 窗口持续改善后，才算 `VERIFIED` 并建议沉淀规则。
 
 ## 6. 作者/维护者入口
 
