@@ -111,5 +111,4 @@ Run `./scripts/weekly_review.sh` once per week and review:
 ## Optsmith Skill Integration
 - Always load and use `agent-optsmith-loop` for project tasks.
 - At task completion, run `optsmith run ...`.
-- Use `optsmith dashboard` to open the local dashboard.
 <!-- OPTSMITH-SKILL:END -->

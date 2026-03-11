@@ -87,7 +87,6 @@ def _agents_block() -> str:
         "## Optsmith Skill Integration\n"
         "- Always load and use `agent-optsmith-loop` for project tasks.\n"
         "- At task completion, run `optsmith run ...`.\n"
-        "- Use `optsmith dashboard` to open the local dashboard.\n"
         f"{BLOCK_END}\n"
     )
 
