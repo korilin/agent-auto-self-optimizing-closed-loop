@@ -27,19 +27,27 @@ jobs:
           bash -n .agents/skills/optsmith-repo-maintainer/scripts/validate_repo_workflow.sh
           bash -n .agents/skills/optsmith-repo-maintainer/scripts/install_to_codex.sh
           bash -n .agents/skills/optsmith-cli-maintainer/scripts/check_cli_version_bump.sh
+          bash -n .agents/skills/optsmith-workflow-maintainer/scripts/check_ci_workflow.sh
 
       - name: Run smoke checks
         run: |
+          set -euxo pipefail
           ROOT="$(pwd)"
+          TMP_ROOT="$(mktemp -d)"
+          trap 'rm -rf "${TMP_ROOT}"' EXIT
+          ROOT_DATA="${TMP_ROOT}/root-data"
+          mkdir -p "${ROOT_DATA}/metrics" "${ROOT_DATA}/knowledge-base/errors" "${ROOT_DATA}/reports"
           chmod +x scripts/*.sh
           chmod +x skills/agent-optsmith/scripts/*.sh
           chmod +x .agents/skills/optsmith-repo-maintainer/scripts/*.sh
           chmod +x .agents/skills/optsmith-cli-maintainer/scripts/*.sh
+          chmod +x .agents/skills/optsmith-workflow-maintainer/scripts/*.sh
+          rm -rf skills/ci-smoke-skill
           ./scripts/create_skill.sh ci-smoke-skill
           .agents/skills/optsmith-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh
-          ./scripts/log_task_run.sh --task-id TASK-CI-1 --task-type debug --model gpt-5 --used-skill false --total-tokens 100 --duration-sec 12 --success true
-          ./scripts/weekly_review.sh
-          ./scripts/metrics_report.sh --all
+          OPTSMITH_DATA_FILE="${ROOT_DATA}/metrics/task-runs.csv" ./scripts/log_task_run.sh --task-id TASK-CI-1 --task-type debug --model gpt-5 --used-skill false --total-tokens 100 --duration-sec 12 --success true
+          OPTSMITH_KB_DIR="${ROOT_DATA}/knowledge-base/errors" OPTSMITH_REPORT_DIR="${ROOT_DATA}/reports" ./scripts/weekly_review.sh
+          OPTSMITH_DATA_FILE="${ROOT_DATA}/metrics/task-runs.csv" ./scripts/metrics_report.sh --all
           mkdir -p /tmp/optsmith-ci
           skills/agent-optsmith/scripts/setup_loop_workspace.sh --workspace /tmp/optsmith-ci
           cd /tmp/optsmith-ci
@@ -47,4 +55,6 @@ jobs:
           "${ROOT}/skills/agent-optsmith/scripts/weekly_review.sh"
           "${ROOT}/skills/agent-optsmith/scripts/metrics_report.sh" --all
           cd "${ROOT}"
+          .agents/skills/optsmith-workflow-maintainer/scripts/check_ci_workflow.sh
+          rm -rf skills/ci-smoke-skill
           .agents/skills/optsmith-repo-maintainer/scripts/validate_repo_workflow.sh

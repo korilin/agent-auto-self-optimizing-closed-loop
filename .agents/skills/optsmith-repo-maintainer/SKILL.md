@@ -14,6 +14,7 @@ This skill is project-local and intended only for `agent-optsmith`.
 - Keep English and Chinese README synchronized.
 - Keep docs consistent with changed commands and behavior.
 - Delegate CLI command-contract, packaging, and version-bump policy to `optsmith-cli-maintainer`.
+- Delegate GitHub workflow reliability policy to `optsmith-workflow-maintainer`.
 - Optionally install this project-local skill into local Codex skill home.
 
 ## Workflow
@@ -31,6 +32,11 @@ This skill is project-local and intended only for `agent-optsmith`.
 If CLI scope changed (`optsmith_cli/`, `pyproject.toml`, `Formula/optsmith.rb`), also run:
 ```bash
 .agents/skills/optsmith-cli-maintainer/scripts/check_cli_version_bump.sh
+```
+
+If workflow scope changed (`.github/workflows/*`), also run:
+```bash
+.agents/skills/optsmith-workflow-maintainer/scripts/check_ci_workflow.sh
 ```
 
 3. Keep `README.md` and `README_CN.md` synchronized:

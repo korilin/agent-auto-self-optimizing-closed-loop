@@ -60,9 +60,10 @@ Options:
 Description:
   1) Auto-run task logging + metrics before commit (default on)
   2) Enforce CLI version policy when CLI scope changed
-  3) Stage all repository changes
-  4) Create one commit non-interactively
-  5) Push commit to remote branch (default on)
+  3) Enforce workflow policy when workflow scope changed
+  4) Stage all repository changes
+  5) Create one commit non-interactively
+  6) Push commit to remote branch (default on)
 EOF
 }
 
@@ -196,6 +197,12 @@ cli_check_script="${repo_root}/.agents/skills/optsmith-cli-maintainer/scripts/ch
 if [[ -x "${cli_check_script}" ]]; then
   echo "running CLI version policy check..."
   "${cli_check_script}"
+fi
+
+workflow_check_script="${repo_root}/.agents/skills/optsmith-workflow-maintainer/scripts/check_ci_workflow.sh"
+if [[ -x "${workflow_check_script}" ]]; then
+  echo "running workflow policy check..."
+  "${workflow_check_script}"
 fi
 
 git add -A

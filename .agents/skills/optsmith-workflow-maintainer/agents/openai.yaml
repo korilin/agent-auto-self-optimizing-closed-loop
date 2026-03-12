@@ -1,0 +1,4 @@
+interface:
+  display_name: "Optsmith Workflow Maintainer"
+  short_description: "Project-local GitHub workflow reliability and CI smoke maintenance."
+  default_prompt: "Use this skill when changing GitHub workflows, CI smoke commands, or workflow validation logic."

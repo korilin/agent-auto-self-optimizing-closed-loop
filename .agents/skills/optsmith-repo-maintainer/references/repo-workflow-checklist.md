@@ -24,7 +24,10 @@
 5. If CLI scope changed (`optsmith_cli/`, `pyproject.toml`, `Formula/optsmith.rb`), run:
    - `.agents/skills/optsmith-cli-maintainer/scripts/check_cli_version_bump.sh`
    - and follow `.agents/skills/optsmith-cli-maintainer/SKILL.md`
-6. Auto-commit and auto-push after all checks pass:
+6. If workflow scope changed (`.github/workflows/*`), run:
+   - `.agents/skills/optsmith-workflow-maintainer/scripts/check_ci_workflow.sh`
+   - and follow `.agents/skills/optsmith-workflow-maintainer/SKILL.md`
+7. Auto-commit and auto-push after all checks pass:
    - `.agents/skills/optsmith-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"`
    - default behavior includes task logging via `scripts/auto_run_loop.sh` before commit
    - default behavior pushes to remote after commit

@@ -71,6 +71,17 @@ Use `optsmith-cli-maintainer` for CLI behavior and release/versioning tasks:
   4. `.agents/skills/optsmith-repo-maintainer/scripts/validate_repo_workflow.sh`
   5. `.agents/skills/optsmith-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"`
 
+Use `optsmith-workflow-maintainer` for GitHub workflow reliability tasks:
+
+- path: `.agents/skills/optsmith-workflow-maintainer/`
+- trigger: changes to `.github/workflows/*` or workflow validation logic.
+- required workflow:
+  1. Keep CI smoke checks side-effect safe (use temp data paths).
+  2. Keep workflow run blocks debuggable (`set -euxo pipefail`).
+  3. `.agents/skills/optsmith-workflow-maintainer/scripts/check_ci_workflow.sh`
+  4. `.agents/skills/optsmith-repo-maintainer/scripts/validate_repo_workflow.sh`
+  5. `.agents/skills/optsmith-repo-maintainer/scripts/auto_commit.sh --message "<commit-message>"`
+
 ## Automation Policy
 
 - Prefer `scripts/auto_run_loop.sh` / `skills/agent-optsmith/scripts/auto_run_loop.sh` over manual multi-command operation.
