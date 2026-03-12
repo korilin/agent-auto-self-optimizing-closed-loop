@@ -144,17 +144,36 @@ optsmith update --workspace "$(pwd)"
 optsmith uninstall --workspace "$(pwd)"
 ```
 
-### Complete Agent Optsmith Flow
+### Complete Agent Optsmith Flow (Text)
 
-![Agent Optsmith workflow map](docs/assets/agent-optsmith-workflow-flow.png)
+1. Task completion and context confirmation:
+- ensure stable `task_id` for reopened work
+- confirm `task_type`, `skill_name`, `success`, and `rework_count`
 
-How to read this flow:
+2. Run automation entry:
+- execute `optsmith run` with available telemetry and metadata
+- normalize one task record format
 
-1. Stages 1-3 cover completion, logging, and task-sample persistence.
-2. Stages 4-5 cover metric generation and optimization-opportunity discovery.
-3. Stages 6-7 cover optimization application, effect verification, and governance promotion.
-4. The right-side return arrow represents the next-task loop.
-5. The bottom note block summarizes core calculation rules.
+3. Persist task sample:
+- append one row to `.agents/optsmith-data/metrics/task-runs.csv`
+- keep token/duration/success/rework fields complete
+
+4. Compute metrics:
+- generate overall, per-skill, and cutover sections
+- produce dashboard/weekly-review inputs
+
+5. Discover opportunities:
+- evaluate optimization opportunities for existing skills
+- generate recommendations for potential new skills
+
+6. Apply optimization:
+- trigger optimization action and update skill content
+- write optimization report and snapshot
+
+7. Verify and govern:
+- compare before/after windows by cutover
+- promote only verified improvements
+- continue the same loop on next tasks
 
 ## 5. How to Interpret Results Correctly
 

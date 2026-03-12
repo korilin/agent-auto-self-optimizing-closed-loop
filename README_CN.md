@@ -142,17 +142,36 @@ optsmith update --workspace "$(pwd)"
 optsmith uninstall --workspace "$(pwd)"
 ```
 
-### 完整 Agent Optsmith 流程图
+### 完整 Agent Optsmith 流程（文字版）
 
-![Agent Optsmith 流程图](docs/assets/agent-optsmith-workflow-flow-zh.png)
+1. 任务完成与上下文确认：
+- 重开任务保持稳定 `task_id`
+- 确认 `task_type`、`skill_name`、`success`、`rework_count`
 
-这张图建议按阶段阅读：
+2. 执行自动入口：
+- 通过 `optsmith run` 传入可用遥测与任务元数据
+- 统一为单条任务记录格式
 
-1. 第 1-3 阶段：任务完成、记录执行、任务样本落盘。
-2. 第 4-5 阶段：指标输出与优化机会发现。
-3. 第 6-7 阶段：执行优化、验证效果、治理沉淀。
-4. 右侧回环箭头表示“下一轮任务继续进入闭环”。
-5. 底部说明块用于汇总核心计算口径。
+3. 任务样本落盘：
+- 追加一行到 `.agents/optsmith-data/metrics/task-runs.csv`
+- 保持 token/耗时/成功/返工字段完整
+
+4. 指标计算：
+- 生成总体、按 skill、cutover 前后分段指标
+- 产出 dashboard/周报所需输入
+
+5. 机会发现：
+- 评估已有 skill 的优化机会
+- 产出潜在新增 skill 的建议
+
+6. 执行优化：
+- 触发优化动作并更新 skill 内容
+- 写入优化报告与快照
+
+7. 验证与治理：
+- 按 cutover 对比优化前后窗口
+- 仅把验证有效的改进纳入规则
+- 下一轮任务继续进入同一闭环
 
 ## 5. 如何正确解读输出
 
