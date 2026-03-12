@@ -133,7 +133,7 @@ if [[ "${curr_pyproject}" != "${curr_init}" || "${curr_pyproject}" != "${curr_fo
 fi
 
 cli_changed="false"
-for path in "${changed_files[@]}"; do
+for path in "${changed_files[@]-}"; do
   if is_cli_related_path "${path}"; then
     cli_changed="true"
     break
@@ -147,7 +147,7 @@ fi
 
 missing_version_files=()
 for f in "${version_files[@]}"; do
-  if ! printf '%s\n' "${changed_files[@]}" | grep -Fxq "${f}"; then
+  if ! printf '%s\n' "${changed_files[@]-}" | grep -Fxq "${f}"; then
     missing_version_files+=("${f}")
   fi
 done
