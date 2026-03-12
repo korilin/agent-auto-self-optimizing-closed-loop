@@ -12,7 +12,6 @@ run_push="true"
 date_val="$(date +%Y-%m-%d)"
 task_id="TASK-$(date +%Y%m%d-%H%M%S)"
 task_type="${OPTSMITH_TASK_TYPE:-repo-maintenance}"
-project="${OPTSMITH_PROJECT:-$(basename "${repo_root}")}"
 model="${OPTSMITH_MODEL:-gpt-5}"
 used_skill="${OPTSMITH_USED_SKILL:-true}"
 skill_name="${OPTSMITH_SKILL_NAME:-optsmith-repo-maintainer}"
@@ -48,7 +47,6 @@ Options:
   --no-push
   --task-id <id>
   --task-type <type>
-  --project <name>
   --model <name>
   --used-skill <true|false>
   --skill-name <name>
@@ -95,10 +93,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     --task-type)
       task_type="${2:-}"
-      shift 2
-      ;;
-    --project)
-      project="${2:-}"
       shift 2
       ;;
     --model)
@@ -171,7 +165,6 @@ if [[ "${run_loop}" == "true" ]]; then
     --date "${date_val}"
     --task-id "${task_id}"
     --task-type "${task_type}"
-    --project "${project}"
     --model "${model}"
     --used-skill "${used_skill}"
     --skill-name "${skill_name}"

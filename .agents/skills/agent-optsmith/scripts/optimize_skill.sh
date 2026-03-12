@@ -206,7 +206,18 @@ fi
 
 task_types_tmp="${tmp_dir}/task-types.txt"
 awk -F',' -v s="${skill_name}" '
-NR > 1 && tolower($6) == "true" && $7 == s {
+BEGIN {
+  used_skill_idx = 5
+  skill_idx = 6
+}
+NR == 1 {
+  if ($4 == "project") {
+    used_skill_idx = 6
+    skill_idx = 7
+  }
+  next
+}
+tolower($used_skill_idx) == "true" && $skill_idx == s {
   print $3
 }
 ' "${filtered_data}" | sort -u > "${task_types_tmp}"

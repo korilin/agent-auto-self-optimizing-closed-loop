@@ -63,6 +63,15 @@ if [[ "${mode}" == "skill" && -z "${skill_name}" ]]; then
 fi
 
 awk -F',' -v mode="${mode}" -v target_skill="${skill_name}" -v cutover="${cutover}" -v data_file="${DATA_FILE}" '
+BEGIN {
+  used_skill_idx = 5
+  skill_idx = 6
+  tokens_idx = 7
+  duration_idx = 8
+  success_idx = 9
+  rework_idx = 10
+}
+
 function pct(a, b) {
   if (b == 0) return "n/a"
   return sprintf("%.2f%%", (a / b) * 100)
@@ -125,18 +134,28 @@ function print_skill_block(skill,   t, overlap_count, s_tokens, s_cnt, s_dur, s_
   print "  rework_rate_delta: " sprintf("%.3f", rework_delta)
 }
 
-NR == 1 { next } # header
+NR == 1 {
+  if ($4 == "project") {
+    used_skill_idx = 6
+    skill_idx = 7
+    tokens_idx = 8
+    duration_idx = 9
+    success_idx = 10
+    rework_idx = 11
+  }
+  next
+} # header
 /^#/ { next }    # comment rows
-NF < 11 { next }
+NF < rework_idx { next }
 {
   date = $1
   task_type = $3
-  used_skill = tolower($6)
-  skill = $7
-  tokens = $8 + 0
-  duration = $9 + 0
-  success = tolower($10)
-  rework = $11 + 0
+  used_skill = tolower($used_skill_idx)
+  skill = $skill_idx
+  tokens = $tokens_idx + 0
+  duration = $duration_idx + 0
+  success = tolower($success_idx)
+  rework = $rework_idx + 0
 
   total_tasks++
   total_tokens += tokens

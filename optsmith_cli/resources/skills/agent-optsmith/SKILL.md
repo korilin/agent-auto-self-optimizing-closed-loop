@@ -11,7 +11,7 @@ Use this skill to operationalize and measure continuous optimization in any proj
 
 - Prefer CLI entrypoint (`optsmith`) so users do not need to resolve install paths manually.
 - Use project-local data under `.agents/optsmith-data/`
-- CLI entrypoint: `optsmith` (`install`, `update`, `dashboard`, `run`, `metrics`, `optimize`, `help`).
+- CLI entrypoint: `optsmith` (`install`, `update`, `dashboard`, `run`, `metrics`, `optimize`, `version`, `help`).
 
 ## Automation Behavior
 
@@ -39,7 +39,6 @@ optsmith install --workspace "$(pwd)"
 optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
-  --project my-service \
   --model gpt-5 \
   --used-skill true \
   --skill-name log-analysis-helper \

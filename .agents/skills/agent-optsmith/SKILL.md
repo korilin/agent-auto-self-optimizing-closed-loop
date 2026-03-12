@@ -39,7 +39,6 @@ optsmith install --workspace "$(pwd)"
 optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
-  --project my-service \
   --model gpt-5 \
   --used-skill true \
   --skill-name log-analysis-helper \

@@ -35,13 +35,13 @@ jobs:
           chmod +x .agents/skills/optsmith-repo-maintainer/scripts/*.sh
           ./scripts/create_skill.sh ci-smoke-skill
           .agents/skills/optsmith-repo-maintainer/scripts/sync_runtime_to_installable_skill.sh
-          ./scripts/log_task_run.sh --task-id TASK-CI-1 --task-type debug --project ci --model gpt-5 --used-skill false --total-tokens 100 --duration-sec 12 --success true
+          ./scripts/log_task_run.sh --task-id TASK-CI-1 --task-type debug --model gpt-5 --used-skill false --total-tokens 100 --duration-sec 12 --success true
           ./scripts/weekly_review.sh
           ./scripts/metrics_report.sh --all
           mkdir -p /tmp/optsmith-ci
           skills/agent-optsmith/scripts/setup_loop_workspace.sh --workspace /tmp/optsmith-ci
           cd /tmp/optsmith-ci
-          "${ROOT}/skills/agent-optsmith/scripts/log_task_run.sh" --task-id TASK-CI-2 --task-type debug --project ci --model gpt-5 --used-skill false --total-tokens 120 --duration-sec 10 --success true
+          "${ROOT}/skills/agent-optsmith/scripts/log_task_run.sh" --task-id TASK-CI-2 --task-type debug --model gpt-5 --used-skill false --total-tokens 120 --duration-sec 10 --success true
           "${ROOT}/skills/agent-optsmith/scripts/weekly_review.sh"
           "${ROOT}/skills/agent-optsmith/scripts/metrics_report.sh" --all
           cd "${ROOT}"

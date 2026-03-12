@@ -6,7 +6,7 @@
 optsmith update
 optsmith install --workspace "$(pwd)"
 optsmith dashboard --workspace "$(pwd)" --host 127.0.0.1 --port 8765
-optsmith run --workspace "$(pwd)" --task-id TASK-1001 --task-type debug --project my-service --model gpt-5 --used-skill true --skill-name log-analysis-helper --success true
+optsmith run --workspace "$(pwd)" --task-id TASK-1001 --task-type debug --model gpt-5 --used-skill true --skill-name log-analysis-helper --success true
 optsmith metrics --workspace "$(pwd)" --all
 optsmith optimize --workspace "$(pwd)" --skill log-analysis-helper
 optsmith help
@@ -24,7 +24,6 @@ optsmith install --workspace "$(pwd)"
 optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
-  --project my-service \
   --model gpt-5 \
   --used-skill true \
   --skill-name log-analysis-helper \
@@ -41,7 +40,6 @@ CODEX_TASK_DURATION_SEC=420 \
 optsmith run --workspace "$(pwd)" \
   --task-id TASK-1002 \
   --task-type debug \
-  --project my-service \
   --model gpt-5 \
   --used-skill true \
   --skill-name log-analysis-helper \
@@ -58,7 +56,6 @@ Codex session logs (`$CODEX_HOME/sessions` and `$CODEX_HOME/archived_sessions`).
 optsmith run --workspace "$(pwd)" \
   --task-id TASK-1001 \
   --task-type debug \
-  --project my-service \
   --model gpt-5 \
   --used-skill true \
   --skill-name log-analysis-helper \

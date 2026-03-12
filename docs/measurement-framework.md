@@ -7,7 +7,6 @@ Use `.agents/optsmith-data/metrics/task-runs.csv` with one row per completed tas
 - `date`: `YYYY-MM-DD`
 - `task_id`: unique identifier
 - `task_type`: e.g., `coding`, `debug`, `review`, `docs`, `ops`
-- `project`: repo or stream name
 - `model`: model name used
 - `used_skill`: `true` or `false`
 - `skill_name`: skill id when `used_skill=true`, otherwise empty
@@ -86,7 +85,6 @@ cd agent-optsmith
 ./scripts/log_task_run.sh \
   --task-id TASK-1001 \
   --task-type debug \
-  --project core-service \
   --model gpt-5 \
   --used-skill true \
   --skill-name log-analysis-helper \

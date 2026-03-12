@@ -70,13 +70,12 @@ fi
 if [[ -f "${seed_csv}" ]]; then
   cp "${seed_csv}" "${tmp_dir}/rootdata/metrics/task-runs.csv"
 else
-  echo "date,task_id,task_type,project,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count" > "${tmp_dir}/rootdata/metrics/task-runs.csv"
+  echo "date,task_id,task_type,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count" > "${tmp_dir}/rootdata/metrics/task-runs.csv"
 fi
 OPTSMITH_DATA_FILE="${tmp_dir}/rootdata/metrics/task-runs.csv" \
   "${repo_root}/scripts/log_task_run.sh" \
   --task-id "TASK-ROOT-CHECK-1" \
   --task-type "debug" \
-  --project "optsmith" \
   --model "gpt-5" \
   --used-skill "false" \
   --total-tokens "100" \
@@ -93,7 +92,6 @@ OPTSMITH_REPORT_DIR="${tmp_dir}/rootdata/reports" \
   "${repo_root}/scripts/auto_run_loop.sh" \
   --task-id "TASK-ROOT-AUTO-1" \
   --task-type "ops" \
-  --project "optsmith" \
   --model "gpt-5" \
   --used-skill "true" \
   --skill-name "agent-optsmith" \
@@ -121,7 +119,6 @@ CODEX_THREAD_ID="${mock_thread_id}" \
   "${repo_root}/scripts/auto_run_loop.sh" \
   --task-id "TASK-ROOT-AUTO-TELEMETRY" \
   --task-type "ops" \
-  --project "optsmith" \
   --model "gpt-5" \
   --used-skill "true" \
   --skill-name "agent-optsmith" \
@@ -129,8 +126,8 @@ CODEX_THREAD_ID="${mock_thread_id}" \
   --skip-weekly >/dev/null
 
 last_row="$(tail -n 1 "${tmp_dir}/rootdata/metrics/task-runs.csv")"
-logged_tokens="$(echo "${last_row}" | awk -F',' '{print $8}')"
-logged_duration="$(echo "${last_row}" | awk -F',' '{print $9}')"
+logged_tokens="$(echo "${last_row}" | awk -F',' '{print $7}')"
+logged_duration="$(echo "${last_row}" | awk -F',' '{print $8}')"
 if [[ ! "${logged_tokens}" =~ ^[1-9][0-9]*$ ]]; then
   echo "error: telemetry fallback should resolve total_tokens > 0"
   echo "  row: ${last_row}"
@@ -158,7 +155,6 @@ cd "${tmp_dir}/skill-project"
 "${repo_root}/skills/agent-optsmith/scripts/log_task_run.sh" \
   --task-id "TASK-SKILL-CHECK-1" \
   --task-type "debug" \
-  --project "optsmith" \
   --model "gpt-5" \
   --used-skill "false" \
   --total-tokens "120" \
@@ -169,7 +165,6 @@ cd "${tmp_dir}/skill-project"
 "${repo_root}/skills/agent-optsmith/scripts/auto_run_loop.sh" \
   --task-id "TASK-SKILL-AUTO-1" \
   --task-type "ops" \
-  --project "optsmith" \
   --model "gpt-5" \
   --used-skill "true" \
   --skill-name "agent-optsmith" \

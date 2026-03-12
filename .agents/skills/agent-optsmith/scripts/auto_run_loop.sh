@@ -23,7 +23,6 @@ fi
 date_val="$(date +%Y-%m-%d)"
 task_id="TASK-$(date +%Y%m%d-%H%M%S)"
 task_type="${OPTSMITH_TASK_TYPE:-coding}"
-project="${OPTSMITH_PROJECT:-$(basename "${workspace_dir}")}"
 model="${OPTSMITH_MODEL:-gpt-5}"
 used_skill="${OPTSMITH_USED_SKILL:-true}"
 skill_name="${OPTSMITH_SKILL_NAME:-agent-optsmith}"
@@ -45,7 +44,6 @@ Usage:
 Options:
   --task-id <id>
   --task-type <type>
-  --project <name>
   --model <name>
   --used-skill <true|false>
   --skill-name <name>
@@ -251,7 +249,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --task-id) task_id="${2:-}"; shift 2 ;;
     --task-type) task_type="${2:-}"; shift 2 ;;
-    --project) project="${2:-}"; shift 2 ;;
+    --project) shift 2 ;; # deprecated no-op
     --model) model="${2:-}"; shift 2 ;;
     --used-skill) used_skill="${2:-}"; shift 2 ;;
     --skill-name) skill_name="${2:-}"; shift 2 ;;
@@ -369,7 +367,6 @@ echo "[1/4] logging task run"
   --date "${date_val}" \
   --task-id "${task_id}" \
   --task-type "${task_type}" \
-  --project "${project}" \
   --model "${model}" \
   --used-skill "${used_skill}" \
   --skill-name "${skill_name}" \

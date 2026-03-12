@@ -10,7 +10,6 @@ DATA_FILE="${OPTSMITH_DATA_FILE:-${DATA_FILE_DEFAULT}}"
 date_val="$(date +%Y-%m-%d)"
 task_id=""
 task_type=""
-project=""
 model=""
 used_skill=""
 skill_name=""
@@ -27,7 +26,6 @@ Usage:
   ./scripts/log_task_run.sh \
     --task-id TASK-1001 \
     --task-type debug \
-    --project core-service \
     --model gpt-5 \
     --used-skill true \
     --skill-name log-analysis-helper \
@@ -53,7 +51,7 @@ while [[ $# -gt 0 ]]; do
     --date) date_val="${2:-}"; shift 2 ;;
     --task-id) task_id="${2:-}"; shift 2 ;;
     --task-type) task_type="${2:-}"; shift 2 ;;
-    --project) project="${2:-}"; shift 2 ;;
+    --project) shift 2 ;; # deprecated no-op
     --model) model="${2:-}"; shift 2 ;;
     --used-skill) used_skill="${2:-}"; shift 2 ;;
     --skill-name) skill_name="${2:-}"; shift 2 ;;
@@ -73,7 +71,6 @@ done
 for pair in \
   "$task_id task_id" \
   "$task_type task_type" \
-  "$project project" \
   "$model model" \
   "$used_skill used_skill" \
   "$total_tokens total_tokens" \
@@ -121,7 +118,6 @@ for pair in \
   "$date_val date" \
   "$task_id task_id" \
   "$task_type task_type" \
-  "$project project" \
   "$model model" \
   "$used_skill used_skill" \
   "$skill_name skill_name" \
@@ -133,8 +129,25 @@ done
 
 if [[ ! -f "$DATA_FILE" ]]; then
   mkdir -p "$(dirname "$DATA_FILE")"
-  echo "date,task_id,task_type,project,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count" > "$DATA_FILE"
+  echo "date,task_id,task_type,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count" > "$DATA_FILE"
+else
+  current_header="$(head -n 1 "$DATA_FILE")"
+  legacy_header="date,task_id,task_type,project,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count"
+  new_header="date,task_id,task_type,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count"
+  if [[ "${current_header}" == "${legacy_header}" ]]; then
+    tmp_file="$(mktemp)"
+    awk -F',' 'BEGIN { OFS="," }
+NR == 1 { print "date,task_id,task_type,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count"; next }
+NF >= 11 { print $1,$2,$3,$5,$6,$7,$8,$9,$10,$11; next }
+NF == 10 { print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10 }
+' "${DATA_FILE}" > "${tmp_file}"
+    mv "${tmp_file}" "${DATA_FILE}"
+    echo "info: migrated legacy task-runs.csv header (removed project column)"
+  elif [[ "${current_header}" != "${new_header}" ]]; then
+    echo "error: unsupported task-runs.csv header: ${current_header}"
+    exit 1
+  fi
 fi
 
-echo "${date_val},${task_id},${task_type},${project},${model},${used_skill},${skill_name},${total_tokens},${duration_sec},${success},${rework_count}" >> "${DATA_FILE}"
+echo "${date_val},${task_id},${task_type},${model},${used_skill},${skill_name},${total_tokens},${duration_sec},${success},${rework_count}" >> "${DATA_FILE}"
 echo "logged: task_id=${task_id} used_skill=${used_skill} skill=${skill_name:-none}"

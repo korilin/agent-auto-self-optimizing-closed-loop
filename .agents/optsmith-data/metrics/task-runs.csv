@@ -1,2 +1,3 @@
-date,task_id,task_type,project,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count
-2026-03-12,TASK-20260312-150200,repo-maintenance,agent-auto-self-optimizing-closed-loop,gpt-5,true,optsmith-repo-maintainer,454872,13178,true,0
+date,task_id,task_type,model,used_skill,skill_name,total_tokens,duration_sec,success,rework_count
+2026-03-12,TASK-20260312-150200,repo-maintenance,gpt-5,true,optsmith-repo-maintainer,454872,13178,true,0
+2026-03-12,TASK-20260312-174719,repo-maintenance,gpt-5,true,optsmith-repo-maintainer,8205517,9772,true,0
